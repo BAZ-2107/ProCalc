@@ -1,11 +1,14 @@
-class UncorrectStringError(Exception):
+class CheckStringError(Exception):
     pass
 
-class UnknownSymbolError(Exception):
-    pass
-
-class MoreOneSignEqualError(Exception):
+class DecodeStringError(Exception):
     pass
 
 class DecodeError(Exception):
+    pass
+
+class ConvertError(Exception):
+    pass
+
+class CalculateError(Exception):
     pass

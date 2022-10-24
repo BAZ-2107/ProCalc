@@ -2,30 +2,50 @@ from exceptions import DecodeError
 from objects import *
 
 class Decode:
-    f = open("functions.txt", "r")
+    info = {"numbers": set(), "consts": set(), "variables": set(), "funcs": set(), "Modules": set(),
+            "Pows": set(), "Adds": set(), "Muls": set(), "Radicals": set(), "Fractions": set()}
+
+    f = open("txt/functions.txt", "r")
     functions = f.read().split()
     f.close()
+    
 
     def decode(self, st):
         array = list(st)
         if ("(" in array) or (")" in array):
             self.check_brackets(array)
         elem = self.decode_expression(array)
-        return elem
+        return self.info, elem
 
-    def decode_and_check(self, array):
+    def decode_expression(self, array):
+        while "(" in array:
+            stop = array.index(")")
+            start = stop
+            while array[start] != "(":
+                start -= 1
+            in_brackets = array[start + 1: stop]
+            del array[start:stop+1]
+            if in_brackets:
+                if "|" in in_brackets:
+                    in_brackets = self.decode_module(in_brackets)
+                in_brackets = self.decode_and_check(in_brackets)
+                array.insert(start, in_brackets)
         if "|" in array:
             array = self.decode_module(array)
+        result = self.decode_and_check(array)
+        return result
+
+    def decode_and_check(self, array):
         array = self.convert_numbers(array)
         array = self.convert_functions(array)
         array = self.convert_constants(array)
-        array = self.convert_perems(array)
+        array = self.convert_variables(array)
         array = self.convert_st_f_r_i(array)
         array = self.convert_m_d_a_s(array)
         return array[0]
 
     def decode_module(self, array):
-        issign = lambda x: x in "+-*/^√["
+        issign = lambda x: x in list("+-*/^√[")
         ismodulebracket = lambda x: x == "|"
         k = 0
         for i, ch in enumerate(array):
@@ -44,22 +64,10 @@ class Decode:
             in_module = array[start + 1: stop]
             del array[start:stop+1]
             in_module = self.decode_and_check(in_module)
-            array.insert(start, Module(in_module))
+            result = Module(in_module)
+            self.info["Modules"].add(result)
+            array.insert(start, result)
         return array
-
-    def decode_expression(self, array):
-        while "(" in array:
-            stop = array.index(")")
-            start = stop
-            while array[start] != "(":
-                start -= 1
-            in_brackets = array[start + 1: stop]
-            del array[start:stop+1]
-            if in_brackets:
-                in_brackets = self.decode_and_check(in_brackets)
-                array.insert(start, in_brackets)
-        result = self.decode_and_check(array)
-        return result
 
 # проверка скобок выражений
     def check_brackets(self, array):
@@ -79,7 +87,7 @@ class Decode:
     # метод конвертировки цифр в числа
     def convert_numbers(self, array):
         isnumber = lambda ch: ch in list("0123456789,")
-        iscorrectnumber = lambda number: (number.count(",") < 2) and ("" not in number.split(","))
+        iscorrectnumber = lambda number: (number.count(",") < 2) and ("" not in number.split(","))            
         start, step, end = 0, 0, len(array)
         while start <= end:
             if start != end and isnumber(array[start]):
@@ -91,10 +99,16 @@ class Decode:
                 if not iscorrectnumber(number):
                     raise DecodeError(f"Неправильная запись числа: <{str(num)}>")
                 del array[start:stop]
-                if "," in number:
-                    array.insert(start, Rational(*from_decimal_to_rational(number)))
+                if "," not in number:
+                    result = Integer(int(number))
+                    self.info["numbers"].add(result)
+                    array.insert(start, result)
                 else:
-                    array.insert(start, Natural(int(number)))
+                    num, denom = int(number.replace(",", "")), int(10**len(number.split(",")[-1]))
+                    result = Fraction(Integer(num), Integer(denom))
+                    self.info["numbers"] |= {num, denom}
+                    self.info["Fractions"].add(result)
+                    array.insert(start, result)
                 step, end = 0, len(array)
             start += 1
         return array
@@ -112,23 +126,35 @@ class Decode:
                         end = len(array)
                         break
             start += 1
+        if array[-1] in self.functions:
+            raise DecodeError(f"У функции <{array[-1]}> не найден агумент")
         return array
 
     def convert_constants(self, array):
-        return list(map(lambda elem: elem if elem not in ["e", "π"] else Const(elem), array))
+        diction = {"e": Exp("e"), "π": Pi("π")}
+        for i, elem in enumerate(array):
+            if elem in diction.keys():
+                result = diction[elem]
+                self.info["consts"].add(result)
+                array[i] = result
+        return array
 
-    def convert_perems(self, array):
-        isunknown = lambda x: (type(x) == str) and (len(x) == 1) and x.isalpha()
-        return list(map(lambda elem: Perem(elem) if isunknown(elem) else elem, array))
+    def convert_variables(self, array):
+        for i, elem in enumerate(array):
+            if (type(elem) == str) and (len(elem) == 1) and elem.isalpha():
+                result = Variable(elem)
+                self.info["variables"].add(result)
+                array[i] = result
+        return array        
 
     def convert_st_f_r_i(self, array):
         signs, funcs = lambda x: type(x) == str, self.functions
         message = "Некорректная запись у  объекта  <{}>"
         first, last = array[0], array[-1]
-        if (last in funcs) or (last in list("√^")):
+        if last in list("√^"):
             raise DecodeError(f"Объект <{last}> не должен стоять в конце выражения")
         if first == "^":
-            raiseDecodeError(f"Объект <{first}> не должен стоять в начале выражения")
+            raise DecodeError(f"Объект <{first}> не должен стоять в начале выражения")
         for i in range(len(array) - 2, -1, -1):
             elem, elem_1 = array[i], array[i + 1]
             if elem in funcs:
@@ -140,13 +166,19 @@ class Decode:
                         arg = array[i + 3]
                         if signs(arg) or signs(st):
                             raise DecodeError(message.format(elem))
-                        array[i] = Pow(diction[elem](arg), st)
+                        func = diction[elem](arg)
+                        self.info["funcs"].add(func)
+                        poww = Pow(func, st)
+                        self.info["Pows"].add(poww)
+                        array[i] = poww
                         del array[i+1:i+4]
                     else:
                         arg = array[i+1]
                         if signs(arg):
                             raise DecodeError(message.format(elem))
-                        array[i] = diction[elem](arg)
+                        func = diction[elem](arg)
+                        self.info["funcs"].add(func)                        
+                        array[i] = func
                         del array[i+1]
                 elif elem == "log":
                     if elem_1 == "^":
@@ -156,7 +188,11 @@ class Decode:
                         arg1, arg2 = array[i+3:i+5]
                         if signs(st) or signs(arg1) or signs(arg2):
                             raise DecodeError(message.format(elem))
-                        array[i] = Pow(diction[elem](arg1, arg2), st)
+                        func = diction[elem](arg1, arg2)
+                        self.info["funcs"].add(func)
+                        poww = Pow(func, st)
+                        self.info["Pows"].add(poww)                        
+                        array[i] = poww
                         del array[i+1:i+5]
                     else:
                         if i + 2 == len(array):
@@ -164,28 +200,35 @@ class Decode:
                         arg1, arg2 = array[i+1:i+3]
                         if signs(arg1) or signs(arg2):
                             raise DecodeError(message.format(elem))
-                        array[i] = diction[elem](arg1, arg2)
+                        func = diction[elem](arg1, arg2)
+                        self.info["funcs"].add(func)
+                        array[i] = func
                         del array[i+1:i+3]
             elif elem == "√":
                 if signs(elem_1):
                         raise DecodeError(message.format(elem))
-                array[i] = Radical(elem_1)
+                radical = Radical(elem_1)
+                self.info["Radicals"].add(radical)
+                array[i] = radical
                 del array[i+1]
             elif elem_1 == "^":
                 st = array[i+2]
                 if signs(elem) or signs(st):
                     raise DecodeError(f"Объект <{elem_1}> не должен соединять <{elem}> и <{st}>")
-                array[i] = Pow(elem, st)
+                poww = Pow(elem, st)
+                self.info["Pows"].add(poww)
+                array[i] = poww
                 del array[i+1:i+3]
             elif (i == 0) and (elem == "-"):
                 if signs(elem_1):
                     raise DecodeError(message.format(elem))
-                array[i] = Invers(elem_1)
+                array[i] = neg(elem_1)
                 del array[i+1]
                 
         return array
 
     def convert_m_d_a_s(self, array):
+        diction = {"*": "Muls", "/": "Fractions", "+": "Adds", "-": "Adds"}
         signs = lambda x: type(x) == str
         message = "Некорректная запись у  объекта  <{}>"
         first, last = array[0], array[-1]
@@ -196,13 +239,17 @@ class Decode:
         for i in range(1 - len(array), 0):
             elem_1, elem = array[i-1], array[i]
             if not (signs(elem) or signs(elem_1)):
-                array[i] = Mul(elem_1, elem)
+                result = Mul(elem_1, elem)
+                self.info["Muls"].add(result)
+                array[i] = result
                 del array[i-1]
             elif elem_1 == "*" or elem_1 == "/":
                 elem_2 = array[i-2]
                 if signs(elem) or signs(elem_2):
                     raise DecodeError(message.format(elem_1))
-                array[i] = Mul(elem_2, elem) if elem_1 == "*" else Div(elem_2, elem)
+                result = Mul(elem_2, elem) if elem_1 == "*" else Fraction(elem_2, elem)
+                self.info[diction[elem_1]].add(result)
+                array[i] = result
                 del array[i-2:i]
 
         for i in range(1 - len(array), 0):
@@ -211,12 +258,13 @@ class Decode:
                 elem_2 = array[i-2]
                 if signs(elem) or signs(elem_2):
                     raise DecodeError(message.format(elem_1))
-                array[i] = Add(elem_2, elem) if elem_1 == "+" else Sub(elem_2, elem)
+                result = Add(elem_2, elem) if elem_1 == "+" else Add(elem_2, neg(elem))
+                self.info[diction[elem_1]].add(result)
+                array[i] = result
                 del array[i-2:i]
 
         return array
-            
-#a = Decode().decode("log^2ab")
+#a = Decode().decode("log^28,0ab")
 #print(str(a), type(a))
 """
 objects:

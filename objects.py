@@ -1,172 +1,231 @@
 # -*- coding: utf-8 -*-
+from functools import reduce
+from output import out
+from exceptions import CalculateError
+from functions import *
 
-# вспомогательные классы для сокращения кода
-class Str:
-    st = ""
+class Integer:
+    sign = 1
 
-    def __str__(self):
-        return self.st
+    def __init__(self, num):
+        self.num = num
+        self.to_st = lambda: str(self.num)
+
+    def update(self):
+        return False, self
+
+    def __call__(self):
+        return self.num * self.sign
+
+    def get_info(self):
+        diction = {1: lambda num: "0 - это ничего" if num == 0
+                   else "1 - основа натуральных чисел!" if num == 1
+                   else f"множители числа <{num}> : {', '.join([str(1)] + self.get_muls(num))}",
+                   -1: lambda num: "0 - это ничего" if num == 0
+                   else "1 - основа целых чисел!" if num == 1
+                   else f"множители числа <{num}> : {', '.join([str(-1)] + self.get_muls(num))}"}
+        return diction[self.sign](self.num)
+
+    def get_muls(self, num, array=[]):
+        if num == 1:
+            return array
+        for dl in range(2, num + 1):
+            if num % dl == 0:
+                return self.get_muls(num // dl, array + [str(dl)])
 
 
-# Классы, которые объявляются при кодировке
-class Natural(Str):
-    def __init__(self, number):
-        self.number = number
-        self.st = str(number)
+class Pi(Integer):
+    def get_info(self):
+        return f"""<{π}> равно <{3.14}>
+Число <π> - математическая константа, равная отношению длины окружности к ее диаметру, которое приблизительно равно <3,14>
+Используется для задания углов не в градусах, а в радианах. Например, 180° = π"""
 
 
-class Rational(Natural):
-    def __init__(self, num, denom):
-        self.num, self.denom = num, denom
-        self.st = f"{str(num)}/{str(denom)}"      
+class Exp(Pi):
+    def get_info(self):
+        return f"""<{e}> равно <{2.72}>.
+Число <e> (число Эйлера) - математическая константа, является базовым соотношением роста для всех непрерывно растущих процессов, которое приблизительно равно <2,72>
+Используется в основании натурального логарифма ln"""
 
 
-class Const(Str):
-    def __init__(self, ch):
-        self.ch, self.st = ch, ch
+class Variable(Integer):
+    def __init__(self, variable):
+        self.variable = variable
 
 
-class Perem(Const):
+# КОНТЕЙНЕРЫ ДЛЯ ОПЕРАЦИЙ
+class Module:
+    sign = 1
+
+    def __init__(self, cont):
+        self.cont = cont
+
+    def update(self):
+        typ, obj = type(self.cont).__name__, self.cont
+        if typ in ("Integer", "Pi", "Exp"):
+            obj.sign = 1
+            return True, obj
+        return False, self    
+
+
+class sin:
+    sign = 1
+
+    def __init__(self, cont):
+        self.cont = cont
+
+    def update(self):
+        return False, self
+
+
+class cos(sin):
     pass
 
 
-class Add(Str):
-    def __init__(self, arg, arg2):
-        self.arg, self.arg2 = arg, arg2
-        self.st = f"({str(arg)}+{str(arg2)})"
-
-
-class Sub(Str):
-    def __init__(self, arg, arg2):
-        self.arg, self.arg2 = arg, arg2
-        self.st = f"({str(arg)}-{str(arg2)})"
-
-
-class Mul(Str):
-    def __init__(self, arg, arg2):
-        self.arg, self.arg2 = arg, arg2
-        self.st = f"({str(arg)}*{str(arg2)})"
-
-
-class Div(Str):
-    def __init__(self, arg, arg2):
-        self.arg, self.arg2 = arg, arg2
-        self.st = f"({str(arg)}/{str(arg2)})"
-
-
-class Pow(Str):
-    def __init__(self, arg, arg2):
-        self.arg, self.arg2 = arg, arg2
-        self.st = f"({str(arg)})^({str(arg2)})"
-
-
-class Radical(Str):
-    def __init__(self, arg):
-        self.arg = arg
-        self.st = f"√{str(arg)}"
-
-
-class Module(Str):
-    def __init__(self, arg):
-        self.arg = arg
-        self.st = f"|{str(arg)}|"
-
-
-class Invers(Str):
-    def __init__(self, arg):
-        self.arg = arg
-        self.st = f"(-{str(self.arg)})"
-
-
-class sin(Str):
-    def __init__(self, arg):
-        name, self.arg = "sin", arg
-        self.st = f"{name}({str(arg)})"
-
-
-class cos(Str):
-    def __init__(self, arg):
-        name, self.arg = "cos", arg
-        self.st = f"{name}({str(arg)})"
-
-
-class tg(Str):
-    def __init__(self, arg):
-        name, self.arg = "tg", arg
-        self.st = f"{name}({str(arg)})"
+class tg(sin):
+    pass
         
     
-class ctg(Str):
-    def __init__(self, arg):
-        name, self.arg = "ctg", arg
-        self.st = f"{name}({str(arg)})"
+class ctg(sin):
+    pass
 
 
-class arcsin(Str):
-    def __init__(self, arg):
-        name, self.arg = "arcsin", arg
-        self.st = f"{name}({str(arg)})"
+class arcsin(sin):
+    pass
         
         
-class arccos(Str):
-    def __init__(self, arg):
-        name, self.arg = "arccos", arg
-        self.st = f"{name}({str(arg)})"
+class arccos(sin):
+    pass
 
 
-class arctg(Str):
-    def __init__(self, arg):
-        name, self.arg = "arctg", arg
-        self.st = f"{name}({str(arg)})"
+class arctg(sin):
+    pass
 
 
-class arcctg(Str):
-    def __init__(self, arg):
-        name, self.arg = "arcctg", arg
-        self.st = f"{name}({str(arg)})"
+class arcctg(sin):
+    pass
 
-class log(Str):
-    def __init__(self, osn, arg):
-        name, self.osn, self.arg = "log", osn, arg
-        self.st = f"{name}({str(osn)})({str(arg)})"
+class log:
+    sign = 1
 
+    def __init__(self, cont, cont2):
+        self.cont, self.cont2 = cont, cont2
 
-class lg(Str):
-    def __init__(self, arg):
-        name, self.arg = "lg", arg
-        self.st = f"{name}({str(arg)})"
+    def update(self):
+        return False, self
 
 
-class ln(Str):
-    def __init__(self, arg):
-        name, self.arg = "ln", arg
-        self.st = f"{name}({str(arg)})"
+class lg(sin):
+    pass
 
 
-# классы, объекты которых появляются при взаимодействии объектов кодировки
-class Integer(Natural, Str):
-    def __init__(self, number):
-        super().__init__(number)
-        if number != 0:
-            self.st = f"({number})"
-        else:
-            self.st = "0"
+class ln(sin):
+    pass
 
 
-class Irrational(Str):
-    def __init__(self, number, pow):
-        if in_decimal(pow) == 0.5:
-            self.st = f"√({str(number)})"
-        else:
-            self.st = f"({str(number)})^({str(pow)})"
-        self.number, self.pow = number, pow
+class Add:
+    sign = 1
+
+    def __init__(self, *objs):
+        self.objs = list(objs)
+
+    def update(self):
+        if self.sign == -1:
+            self.sign, self.objs = 1, change_sign_if_neg(self)
+            out(f"Изменены знаки элементов выражения: <{str(self)}>")
+
+        if "Add" in [type(x).__name__ for x in self.objs]:
+            st, self.objs = str(self), add__in_objs(self.objs)
+            st2 = str(self)
+            if st != st2:
+                out(f"Раскрыты скобки выражений: <{st2}>")
+
+        # на этом моменте среди слагаемых будут только Mul, Fraction, Pow, Radical, Module, sin, cos, tg, ctg, arcsin, arccos, arctg, arcctg, log, lg, ln, Variable, Pi, Exp, Integer
+
+        st, self.objs = str(self), sort_elems_and_return_answer(self.objs) # сортировка элементов
+        st2 = str(self)
+        if st != st2:
+            out(f"Пусть элементы будут стоять в таком порядке: <{st2}>")
+
+        types = reduce(lambda x, y: x | y, [get_all_types(i) for i in self.objs])
+
+        if all(elem == "Integer" for elem in types):
+            return self.add_numbers()
+
+        
+
+        #types = reduce(lambda x, y: x & y, list(map(lambda el: get_types(el), self.objs)))
+        #if types:
+            #return False, types
+        return False, self
+
+    def add_numbers(self):
+        obj = sum(elem() for elem in self.objs)
+        if obj < 0:
+            return True, neg(Integer(abs(obj)))
+        return True, Integer(obj)        
+
+
+class Mul:
+    sign = 1
+
+    def __init__(self, *objs):
+        self.objs = list(objs)
+
+    def update(self):
+        return False, self
+
+
+class Fraction:
+    sign = 1
+
+    def __init__(self, cont, cont2):
+        self.cont, self.cont2 = cont, cont2
+
+    def update(self):
+        
+
+        #types = reduce(lambda x, y: get_all_types(x) | get_all_types(y), self.objs)        
+        return False, self
+
+
+class Radical:
+    sign = 1
+
+    def __init__(self, cont):
+        answer, cont2 = cont.update()
+        typ, value = type(cont2).__name__, cont2
+        if typ in ["Pi", "Exp", "Integer"] and value.sign == -1:
+            raise CalculateError(f"Выражение <{str(cont)}> не может быть отрицательным")
+        self.cont = cont
+
+    def update(self):
+        typ, value = type(self.cont).__name__, self.cont
+
+        if typ == "Integer":
+            num = value.num
+            result = num**0.5
+            if not result % 1:
+                return True, Integer(int(result))
+        return False, self
+
+
+class Pow:
+    sign = 1
+
+    def __init__(self, cont, cont2):
+        self.cont, self.cont2 = cont, cont2
+
+    def update(self):
+        return False, self
 
 
 diction = {"sin": lambda ex: sin(ex), "cos": lambda ex: cos(ex), "tg": lambda ex: tg(ex),
-           "ctg": lambda ex: ctg(ex), "arcsin": lambda ex: arcsin(ex),
+           "ctg": lambda ex:
+ctg(ex), "arcsin": lambda ex: arcsin(ex),
            "arccos": lambda ex: arccos(ex), "arctg": lambda ex: arctg(ex),
            "arcctg": lambda ex: arcctg(ex), "lg": lambda ex: lg(ex),
            "ln": lambda ex: ln(ex), "log": lambda ex, ex_1: log(ex, ex_1)}
 
-#a = from_decimal_to_rational("5,5")
-#print(a)
+
+nod = lambda a, b: a if b == 0 else nod(b, a % b)
