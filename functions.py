@@ -21,12 +21,6 @@ def get_all_types(obj):
         types |= get_all_types(obj.cont)
     return types
 
-
-def one_in_other(obj, obj2):
-    typ, typ2 = type(obj).__name__, type(obj2).__name__
-    if typ != typ2:
-        return {Integer(1)}
-
 def in_decimal(obj):
     typ = type(obj).__name__
     if typ in ("sin", "cos", "tg", "ctg"):
