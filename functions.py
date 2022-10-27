@@ -1,7 +1,11 @@
 from functools import reduce
 
 change_sign_if_neg = lambda add: list(map(lambda obj: neg(obj), add.objs)) # вызывается, когда знак выражения отрицательный. Возвращает противоположные элементы
-    
+
+simple_nod = lambda a, b: a if b == 0 else simple_nod(b, a % b)
+nod = lambda *args: reduce(lambda x, y: simple_nod(x, y), args)
+
+nok = lambda *args: reduce(lambda x, y: x * y // nod(x, y), args)
 
 def neg(cont):
     cont.sign *= -1
@@ -20,6 +24,19 @@ def get_all_types(obj):
     else:
         types |= get_all_types(obj.cont)
     return types
+
+
+def one_in_other(obj, obj2):
+    typ, typ2 = type(obj).__name__, type(obj2).__name__
+    if typ != typ2:
+        return {Integer(1)}
+
+def get_muls(num, array=[]):
+        if num == 1:
+            return array
+        for dl in range(2, num + 1):
+            if num % dl == 0:
+                return get_muls(num // dl, array + [str(dl)])
 
 def in_decimal(obj):
     typ = type(obj).__name__
@@ -49,16 +66,16 @@ def in_decimal(obj):
         if typ == "ctg":
             return sign * trig_values[90 - result] /  trig_values[result]
 
-    diction = {"Integer": lambda obj: obj.sign * obj.num,
-               "Pi": lambda obj: obj.sign * 3.14,
-               "Exp": lambda obj: obj.sign * 2.72,
+    diction = {"Integer": lambda obj: obj.num,
+               "Pi": lambda obj: 3.14,
+               "Exp": lambda obj: 2.72,
                "Mul": lambda obj: reduce(lambda el, el2: el * el2, [in_decimal(i) for i in obj.objs]),
                "Add": lambda obj: sum([in_decimal(i) for i in obj.objs]),
                "Fraction": lambda obj: in_decimal(obj.cont) / in_decimal(obj.cont2),
                "Pow": lambda obj: in_decimal(obj.cont)**in_decimal(obj.cont2),
                "Module": lambda obj: abs(in_decimal(obj.cont)),
                "Radical": lambda obj: in_decimal(obj.cont)**0.5}
-    return diction.get(type(obj).__name__)(obj)
+    return obj.sign * diction.get(type(obj).__name__)(obj)
 
 def add__in_objs(objs): # вызывается, когда среди слагаемых есть объект Add. Рекурсивно возвращает объект, у которого нет среди слагаемых Add
     if not "Add" in [type(elem).__name__ for elem in objs]:

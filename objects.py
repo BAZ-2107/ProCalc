@@ -20,18 +20,11 @@ class Integer:
     def get_info(self):
         diction = {1: lambda num: "0 - это ничего" if num == 0
                    else "1 - основа натуральных чисел!" if num == 1
-                   else f"множители числа <{num}> : {', '.join([str(1)] + self.get_muls(num))}",
+                   else f"множители числа <{num}> : {', '.join([str(1)] + get_muls(num))}",
                    -1: lambda num: "0 - это ничего" if num == 0
                    else "1 - основа целых чисел!" if num == 1
-                   else f"множители числа <{num}> : {', '.join([str(-1)] + self.get_muls(num))}"}
+                   else f"множители числа <{num}> : {', '.join([str(-1)] + get_muls(num))}"}
         return diction[self.sign](self.num)
-
-    def get_muls(self, num, array=[]):
-        if num == 1:
-            return array
-        for dl in range(2, num + 1):
-            if num % dl == 0:
-                return self.get_muls(num // dl, array + [str(dl)])
 
 
 class Pi(Integer):

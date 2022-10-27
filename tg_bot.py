@@ -4,6 +4,7 @@ from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, MessageH
 from  for_tg.keyboards import Keyboards
 from main import ProCalc
 from functools import reduce
+from functions import nod, nok
 
 
 def run(update, context):
@@ -29,12 +30,11 @@ def run(update, context):
         query.edit_message_text(text="Введите выражение", reply_markup=keyboards.for_calc)
 
 def NODandNOK(update, context):
-    nod = lambda a, b: a if b == 0 else nod(b, a%b)
     try:
         array = list(map(int, update.message.text[5:].split()))
         if any(i < 1 for i in array) or not array:
             raise Exception
-        word, answer = ("делителем", reduce(nod, array)) if update.message.text[:4] == "/nod" else ("кратным", reduce(lambda x, y: x * y // nod(x, y), array))
+        word, answer = ("делителем", nod(*array)) if update.message.text[:4] == "/nod" else ("кратным", nok(*array))
         update.message.reply_text(text=f"Наибольшим общим {word} чисел <{', '.join(list(map(str, array)))}> является число <{answer}>")
         
     except Exception:
