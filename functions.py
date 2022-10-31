@@ -1,4 +1,5 @@
 from functools import reduce
+from exceptions import TrigonometricError
 
 change_sign_in_add = lambda add: list(map(lambda obj: neg(obj), add.objs)) # вызывается, когда знак выражения отрицательный. Возвращает противоположные элементы
 
@@ -28,7 +29,8 @@ def in_decimal(obj):
     typ = type(obj).__name__
     if typ in ("sin", "cos", "tg", "ctg"):
         trig_values = [float(i) for i in open("txt/sinus_values.txt")]
-        result = round(in_decimal(obj.cont)) % 360
+        res = round(in_decimal(obj.cont))
+        result = res % 360
         sign = 1
         if 90 < result <= 180:
             result = 180 - result
@@ -48,8 +50,12 @@ def in_decimal(obj):
         if typ == "cos":
             return sign * trig_values[90 - result]
         if typ == "tg":
+            if result == 90:
+                raise TrigonometricError(f"Не существует значения тангенса угла {res} градусов")
             return sign * trig_values[result] / trig_values[90 - result]
         if typ == "ctg":
+            if result == 0:
+                raise TrigonometricError(f"Не существует значения котангенса угла {res} градусов")
             return sign * trig_values[90 - result] / trig_values[result]
 
     diction = {"Integer": lambda obj: obj.num,
