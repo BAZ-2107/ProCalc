@@ -132,12 +132,14 @@ class Add:
         self.objs = list(objs)
 
     def update(self):
+        """
         st = to_st(self)
         if self.sign == -1:
             self.sign, self.objs = 1, change_sign_in_add(self)
             out(f"{st} <=> {to_st(self)}")
             return True, self
         # на этом моменте среди слагаемых будут только Mul, Fraction, Pow, Radical, Module, sin, cos, tg, ctg, arcsin, arccos, arctg, arcctg, log, lg, ln, Variable, Pi, Exp, Integer
+        """
         for i, value in enumerate(self.objs):
             result, elem = value.update()
             while result:
@@ -147,11 +149,24 @@ class Add:
                 out(f"{st1} <=> {st2}")
                 result, elem = elem.update()
 
-
         #types = reduce(lambda x, y: x & y, list(map(lambda el: get_types(el), self.objs)))
         #if types:
             #return False, types
         return False, self
+
+    def two_adds(self):
+        obj, obj2 = self.objs
+        typ, typ2 = type(obj).__name__, type(obj2).__name__
+        if typ == typ2:
+            if typ == "Integer": # складываются 2 числа между собой
+                res = obj.sign * obj.num + obj2.sign * obj2.num
+                if res < 0:
+                    return Integer(abs(res), sign=-1)
+                return Integer(res)
+            if typ == "variable":
+                if obj.variable == obj2.variable:
+                    pass
+
 
     def add_numbers(self):
         obj = sum(elem() for elem in self.objs)

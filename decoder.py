@@ -2,7 +2,7 @@ from exceptions import DecodeStringError
 from DecodeExpression import Decode
 from ConvertExpression import Convert
 from output import out
-from functions import to_st
+from functions import to_st, in_decimal
 
 
 def decode_string(st):
@@ -26,12 +26,19 @@ def decode_string(st):
             out(f"<{st}> - это число")
             out(res.get_info())
         elif typ == "Variable":
-            out(f"<{st}> - это переменная")      
+            out(f"<{st}> - это переменная")
         else:
-            Convert(res, info).run()
-
-    if "" in st.split(sign):
-        raise DecodeStringError("Знак отношения должен соединять выражения")
+            out(f"Распознано как: <{to_st(res)}>")
+            if not info["variables"]:
+                out(f"Результат вычисления: <{in_decimal(res)}>")
+            else:
+                out("Извините, решать буквенные выражения не умею (")
+            #Convert(res, info).run()
+            
+    else:
+        if "" in st.split(sign):
+            raise DecodeStringError("Знак отношения должен соединять выражения")
+        out("Извините, решать уравнения или неравенства не умею (")
         #answer, obj = 
 #    if sign == "=":
 #        return Decoded_Equal(st).run()

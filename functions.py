@@ -50,7 +50,7 @@ def in_decimal(obj):
         if typ == "tg":
             return sign * trig_values[result] / trig_values[90 - result]
         if typ == "ctg":
-            return sign * trig_values[90 - result] /  trig_values[result]
+            return sign * trig_values[90 - result] / trig_values[result]
 
     diction = {"Integer": lambda obj: obj.num,
                "Pi": lambda obj: 3.14,
@@ -78,6 +78,22 @@ def sort_elems_and_return_answer(elems):
             "tg", "ctg", "arcsin", "arccos", "arctg", "arcctg", "log", "lg",
             "ln", "Variable", "Pi", "Exp", "Integer"].index(type(arg).__name__)
     return sorted(elems, key=for_sort)
+
+def eq(obj, obj2):
+    diction = {"Integer": lambda x, y: x.num == y.num, "Pi": lambda x, y: x.num == y.num,
+               "Exp": lambda x, y: x.num == y.num, "Variable": lambda x, y: x.variable == y.variable,
+               "Integer": lambda x, y: x.num == y.num}
+    if type(obj).__name == type(obj2).__name__ and obj.sign == obj2.sign:
+        typ = type(obj).__name
+        if typ in ["Pi", "Exp"]:
+            return True
+        if typ == "Integer":
+            return obj.num == obj2.num
+        if typ == "Mul":
+            return set([to_st(i) for i in obj.objs]) == set([to_st(j) for j in obj2.objs])
+        if typ in ["sin", "cos", "tg", "ctg", "arcsin", "arccos", "arctg", "arcctg", "lg", "ln"]:
+            return eq(obj.cont, obj2.cont)
+    return 
 
 def to_st(obj):
     typ = type(obj).__name__

@@ -23,11 +23,11 @@ class Keyboards:
     poww = InlineKeyboardButton('^', callback_data='^')
     sqrt = InlineKeyboardButton('√', callback_data='√')
     
-    more = InlineKeyboardButton('>', callback_data='>')
-    more_or_equal = InlineKeyboardButton('⩾', callback_data='⩾')
-    equal = InlineKeyboardButton('=', callback_data='=')
-    less_or_equal = InlineKeyboardButton('⩽', callback_data='⩽')
-    less = InlineKeyboardButton('<', callback_data='<')
+    #more = InlineKeyboardButton('>', callback_data='>')
+    #more_or_equal = InlineKeyboardButton('⩾', callback_data='⩾')
+    #equal = InlineKeyboardButton('=', callback_data='=')
+    #less_or_equal = InlineKeyboardButton('⩽', callback_data='⩽')
+    #less = InlineKeyboardButton('<', callback_data='<')
     
     comm = InlineKeyboardButton(',', callback_data=',')
     
@@ -49,7 +49,7 @@ class Keyboards:
                    [left_bracket, module_bracket, right_bracket, del_last, del_all],
                    [one, two, three, add, div], [four, five, six, sub, poww],
                    [seven, eight, nine, mul, sqrt],
-                    [more, more_or_equal, equal, less_or_equal, less],
+                    #[more, more_or_equal, equal, less_or_equal, less],
                    [zero, comm, letters, running]]
     
     

@@ -14,7 +14,7 @@ def run(update, context):
     elif query.data == "running":
         result = ProCalc().run(keyboards.text.text)
         keyboards.text.text = " "
-        query.edit_message_text(text=result)    
+        query.edit_message_text(text=result)
     else:
         if query.data == "CE":
             if len(keyboards.text.text) != 1:
@@ -45,30 +45,10 @@ def calc(update, context):
     update.message.reply_text(text="Введите выражение", reply_markup=keyboards.for_calc)
 
 def start(update, context):
-    update.message.reply_text(text=f"""
-  Здравствуйте, <{update.message.chat.first_name}>! Я - продвинутый калькулятор, могу не только вычислять числовые выражения, но и решать уравнения и неравенства с переменными!
-
-  Если выражение вводится в поле ввода, то использоваться могут только цифры, латинские и греческие буквы (в нижнем регистре) и следующие знаки : < +-*/^√,>⩾=⩽<(|) >
-
-  Также можно воспользоваться командой /calc, которая запустит клавиатуру для набора символов.
-
-  Также есть команда /help, которая, возможно, поможет вам в чем-то.
-
-Для того чтобы вычислить НОД или НОК нескольких НАТУРАЛЬНЫХ чисел, надо записать либо команду /nod, либо команду /nok, затем через ПРОБЕЛ записать натуральные числа. Пример: /nod 2 3 4
-
-  Успехов!""")
+    update.message.reply_text(text=open("txt/for_start.txt", encoding="utf-8").read().format(update.message.chat.first_name))
 
 def help(update, context):
-    update.message.reply_text(text=f"""
-  Здравствуйте, <{update.message.chat.first_name}>! Вы находитесь в чате с ботом, который, возможно, поможет вам в вычислении или решении уравнений и неравенств.
-
-  Вы можете вводить ТОЛЬКО греческие или латинские буквы В НИЖНЕМ регистре и следующие знаки : < +-*/^√,>⩾=⩽<(|) >
-
-  Если Вам неудобно набирать со своей клавиатуры, есть вариант воспользоваться командой /calc, которая предложит инлайн-клавиатуру
-
-Для того чтобы вычислить НОД или НОК нескольких НАТУРАЛЬНЫХ чисел, надо записать либо команду /nod, либо команду /nok, затем через ПРОБЕЛ записать натуральные числа. Пример: /nod 2 3 4
-
-  Писать боту что-то, не содержащее в себе выражение, бесполезно: бот Вас не поймет :(""")
+    update.message.reply_text(text=open("txt/for_help.txt", encoding="utf-8").read().format(update.message.chat.first_name))
 
 def message_input(update, context):
     result = ProCalc().run(update.message.text)
