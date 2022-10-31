@@ -1,6 +1,6 @@
 from functools import reduce
 
-change_sign_if_neg = lambda add: list(map(lambda obj: neg(obj), add.objs)) # вызывается, когда знак выражения отрицательный. Возвращает противоположные элементы
+change_sign_in_add = lambda add: list(map(lambda obj: neg(obj), add.objs)) # вызывается, когда знак выражения отрицательный. Возвращает противоположные элементы
 
 simple_nod = lambda a, b: a if b == 0 else simple_nod(b, a % b)
 nod = lambda *args: reduce(lambda x, y: simple_nod(x, y), args)
@@ -10,20 +10,6 @@ nok = lambda *args: reduce(lambda x, y: x * y // nod(x, y), args)
 def neg(cont):
     cont.sign *= -1
     return cont
-
-def get_all_types(obj):
-    typ, types = type(obj).__name__, set()
-    if typ in ["Integer", "Pi", "Exp", "Variable"]:
-        return {typ}
-    types |= {typ}
-    if typ in ("Mul", "Add"):
-        types |= reduce(lambda x, y: x | y, [get_all_types(elem) for elem in obj.objs])
-    elif typ in ("Fraction", "Pow", "log"):
-        types |= get_all_types(obj.cont)
-        types |= get_all_types(obj.cont2)
-    else:
-        types |= get_all_types(obj.cont)
-    return types
 
 
 def one_in_other(obj, obj2):

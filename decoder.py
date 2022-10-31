@@ -18,7 +18,6 @@ def decode_string(st):
     if not sign:
         info, res = Decode().decode(st)
         out(to_st(res))
-        print(info)
         st, typ = to_st(res), type(res).__name__
         if typ == "Integer":
             out(f"<{st}> - это число")
@@ -29,7 +28,7 @@ def decode_string(st):
         elif typ == "Variable":
             out(f"<{st}> - это переменная")      
         else:
-            Convert(res).run()
+            Convert(res, info).run()
 
     if "" in st.split(sign):
         raise DecodeStringError("Знак отношения должен соединять выражения")

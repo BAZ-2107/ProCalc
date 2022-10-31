@@ -54,6 +54,15 @@ class Module:
         self.cont = cont
 
     def update(self):
+        st = to_st(self.cont)
+        result, cont = self.cont.update()
+        while result:
+            st1 = to_st(self)
+            self.cont = cont
+            st2 = to_st(self)
+            out(f"{st1} <=> {st2}")
+            
+            result, cont = self.cont.update()
         typ, obj = type(self.cont).__name__, self.cont
         if typ in ("Integer", "Pi", "Exp"):
             obj.sign = 1
@@ -115,7 +124,7 @@ class lg(sin):
 class ln(sin):
     pass
 
-
+#{'numbers': {'2': <objects.Integer object at 0x000001B654D14790>}, 'consts': {}, 'variables': {}, 'funcs': {}, 'Modules': {}, 'Pows': {}, 'Adds': {'2+2': <objects.Add object at 0x000001B654D149D0>}, 'Muls': {}, 'Radicals': {}, 'Fractions': {}}
 class Add:
     sign = 1
 
@@ -123,29 +132,21 @@ class Add:
         self.objs = list(objs)
 
     def update(self):
+        st = to_st(self)
         if self.sign == -1:
-            self.sign, self.objs = 1, change_sign_if_neg(self)
-            out(f"Изменены знаки элементов выражения: <{str(self)}>")
-
-        if "Add" in [type(x).__name__ for x in self.objs]:
-            st, self.objs = str(self), add__in_objs(self.objs)
-            st2 = str(self)
-            if st != st2:
-                out(f"Раскрыты скобки выражений: <{st2}>")
-
+            self.sign, self.objs = 1, change_sign_in_add(self)
+            out(f"{st} <=> {to_st(self)}")
+            return True, self
         # на этом моменте среди слагаемых будут только Mul, Fraction, Pow, Radical, Module, sin, cos, tg, ctg, arcsin, arccos, arctg, arcctg, log, lg, ln, Variable, Pi, Exp, Integer
+        for i, value in enumerate(self.objs):
+            result, elem = value.update()
+            while result:
+                st1 = to_st(self)
+                self.objs[i] = elem
+                st2 = to_st(self)
+                out(f"{st1} <=> {st2}")
+                result, elem = elem.update()
 
-        st, self.objs = str(self), sort_elems_and_return_answer(self.objs) # сортировка элементов
-        st2 = str(self)
-        if st != st2:
-            out(f"Пусть элементы будут стоять в таком порядке: <{st2}>")
-
-        types = reduce(lambda x, y: x | y, [get_all_types(i) for i in self.objs])
-
-        if all(elem == "Integer" for elem in types):
-            return self.add_numbers()
-
-        
 
         #types = reduce(lambda x, y: x & y, list(map(lambda el: get_types(el), self.objs)))
         #if types:

@@ -1,9 +1,10 @@
 from exceptions import DecodeError
+from functions import to_st
 from objects import *
 
 class Decode:
-    info = {"numbers": set(), "consts": set(), "variables": set(), "funcs": set(), "Modules": set(),
-            "Pows": set(), "Adds": set(), "Muls": set(), "Radicals": set(), "Fractions": set()}
+    info = {"numbers": {}, "consts": {}, "variables": {}, "funcs": {}, "Modules": {},
+            "Pows": {}, "Adds": {}, "Muls": {}, "Radicals": {}, "Fractions": {}}
 
     f = open("txt/functions.txt", "r")
     functions = f.read().split()
@@ -65,7 +66,7 @@ class Decode:
             del array[start:stop+1]
             in_module = self.decode_and_check(in_module)
             result = Module(in_module)
-            self.info["Modules"].add(result)
+            self.info["Modules"][to_st(result)] = result
             array.insert(start, result)
         return array
 
@@ -101,13 +102,13 @@ class Decode:
                 del array[start:stop]
                 if "," not in number:
                     result = Integer(int(number))
-                    self.info["numbers"].add(result)
+                    self.info["numbers"][to_st(result)] = result
                     array.insert(start, result)
                 else:
                     num, denom = int(number.replace(",", "")), int(10**len(number.split(",")[-1]))
                     result = Fraction(Integer(num), Integer(denom))
-                    self.info["numbers"] |= {num, denom}
-                    self.info["Fractions"].add(result)
+                    self.info["numbers"][to_st(result)] = result
+                    self.info["Fractions"][to_st(result)] = result
                     array.insert(start, result)
                 step, end = 0, len(array)
             start += 1
@@ -135,7 +136,7 @@ class Decode:
         for i, elem in enumerate(array):
             if elem in diction.keys():
                 result = diction[elem]
-                self.info["consts"].add(result)
+                self.info["consts"][to_st(result)] = result
                 array[i] = result
         return array
 
@@ -143,7 +144,7 @@ class Decode:
         for i, elem in enumerate(array):
             if (type(elem) == str) and (len(elem) == 1) and elem.isalpha():
                 result = Variable(elem)
-                self.info["variables"].add(result)
+                self.info["variables"][to_st(result)] = result
                 array[i] = result
         return array        
 
@@ -167,9 +168,9 @@ class Decode:
                         if signs(arg) or signs(st):
                             raise DecodeError(message.format(elem))
                         func = diction[elem](arg)
-                        self.info["funcs"].add(func)
+                        self.info["funcs"][to_st(func)] = func
                         poww = Pow(func, st)
-                        self.info["Pows"].add(poww)
+                        self.info["Pows"][to_st(poww)] = poww
                         array[i] = poww
                         del array[i+1:i+4]
                     else:
@@ -177,7 +178,7 @@ class Decode:
                         if signs(arg):
                             raise DecodeError(message.format(elem))
                         func = diction[elem](arg)
-                        self.info["funcs"].add(func)                        
+                        self.info["funcs"][to_st(func)] = func                       
                         array[i] = func
                         del array[i+1]
                 elif elem == "log":
@@ -189,9 +190,9 @@ class Decode:
                         if signs(st) or signs(arg1) or signs(arg2):
                             raise DecodeError(message.format(elem))
                         func = diction[elem](arg1, arg2)
-                        self.info["funcs"].add(func)
+                        self.info["funcs"][to_st(func)] = func
                         poww = Pow(func, st)
-                        self.info["Pows"].add(poww)                        
+                        self.info["Pows"][to_st(poww)] = poww
                         array[i] = poww
                         del array[i+1:i+5]
                     else:
@@ -201,14 +202,14 @@ class Decode:
                         if signs(arg1) or signs(arg2):
                             raise DecodeError(message.format(elem))
                         func = diction[elem](arg1, arg2)
-                        self.info["funcs"].add(func)
+                        self.info["funcs"][to_st(func)] = func
                         array[i] = func
                         del array[i+1:i+3]
             elif elem == "√":
                 if signs(elem_1):
                         raise DecodeError(message.format(elem))
                 radical = Radical(elem_1)
-                self.info["Radicals"].add(radical)
+                self.info["Radicals"][to_st(radical)] = radical
                 array[i] = radical
                 del array[i+1]
             elif elem_1 == "^":
@@ -216,7 +217,7 @@ class Decode:
                 if signs(elem) or signs(st):
                     raise DecodeError(f"Объект <{elem_1}> не должен соединять <{elem}> и <{st}>")
                 poww = Pow(elem, st)
-                self.info["Pows"].add(poww)
+                self.info["Pows"][to_st(poww)] = poww
                 array[i] = poww
                 del array[i+1:i+3]
             elif (i == 0) and (elem == "-"):
@@ -240,7 +241,7 @@ class Decode:
             elem_1, elem = array[i-1], array[i]
             if not (signs(elem) or signs(elem_1)):
                 result = Mul(elem_1, elem)
-                self.info["Muls"].add(result)
+                self.info["Muls"][to_st(result)] = result
                 array[i] = result
                 del array[i-1]
             elif elem_1 == "*" or elem_1 == "/":
@@ -248,7 +249,7 @@ class Decode:
                 if signs(elem) or signs(elem_2):
                     raise DecodeError(message.format(elem_1))
                 result = Mul(elem_2, elem) if elem_1 == "*" else Fraction(elem_2, elem)
-                self.info[diction[elem_1]].add(result)
+                self.info[diction[elem_1]][to_st(result)] = result
                 array[i] = result
                 del array[i-2:i]
 
@@ -259,7 +260,7 @@ class Decode:
                 if signs(elem) or signs(elem_2):
                     raise DecodeError(message.format(elem_1))
                 result = Add(elem_2, elem) if elem_1 == "+" else Add(elem_2, neg(elem))
-                self.info[diction[elem_1]].add(result)
+                self.info[diction[elem_1]][to_st(result)] = result
                 array[i] = result
                 del array[i-2:i]
 
