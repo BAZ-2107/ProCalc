@@ -12,3 +12,6 @@ class ConvertError(Exception):
 
 class CalculateError(Exception):
     pass
+
+class TrigonometricError(Exception):
+    pass
