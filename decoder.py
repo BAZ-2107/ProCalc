@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from exceptions import DecodeStringError
 from DecodeExpression import Decode
 from ConvertExpression import Convert
