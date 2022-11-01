@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from exceptions import DecodeError
 from functions import to_st
 from objects import *
