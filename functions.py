@@ -29,7 +29,8 @@ def in_decimal(obj):
     typ = type(obj).__name__
     if typ in ("sin", "cos", "tg", "ctg"):
         trig_values = [float(i) for i in open("txt/sinus_values.txt")]
-        res = round(in_decimal(obj.cont))
+        k = 1 if "π" not in to_st(obj.cont) else 180 / 3.14
+        res = round(k * in_decimal(obj.cont))
         result = res % 360
         sign = 1
         if 90 < result <= 180:
@@ -57,6 +58,22 @@ def in_decimal(obj):
             if result == 0:
                 raise TrigonometricError(f"Не существует значения котангенса угла {res} градусов")
             return sign * trig_values[90 - result] / trig_values[result]
+
+    elif typ in ("arcsin", "arccos", "arctg", "arccctg"):
+        trig_values = [float(i) for i in open("txt/sinus_values.txt")]
+        res = round(in_decimal(obj.cont), 4)
+        if typ in ("arcsin", "arccos"):
+            if abs(res) > 1:
+                raise TrigonometricError(f"Не существует такого значения синуса или косинуса: {res} ")
+            result = min(range(0, 91), key=lambda x: abs(trig_values[x] - abs(res)))
+            if typ == "arcsin":
+                if res < 0:
+                    return -result
+                return result
+            elif typ == "arccos":
+                if res < 0:
+                    return 90 + result               
+                return 90 - result
 
     diction = {"Integer": lambda obj: obj.num,
                "Pi": lambda obj: 3.14,
