@@ -26,6 +26,35 @@ def get_muls(num, array=[]):
             if num % dl == 0:
                 return get_muls(num // dl, array + [str(dl)])
 
+def reduct_formules(name, sign, res):
+    trig_values = [float(i) for i in open("txt/sinus_values.txt")]
+    result = res % 360
+    if 90 < result <= 180:
+            result = 180 - result
+            if name != "sin":
+                sign *= -1
+    elif 180 < result <= 270:
+        result -= 180
+        if name in ("sin", "cos"):
+            sign *= -1
+    elif 270 < result < 360:
+        result = 360 - result
+        if name != "cos":
+            sign *= -1
+    if name == "sin":
+        return sign * trig_values[result]
+    if name == "cos":
+        return sign * trig_values[90 - result]
+    if name == "tg":
+        if result == 90:
+            raise TrigonometricError(f"Не существует значения тангенса угла {res} градусов")
+        return sign * trig_values[result] / trig_values[90 - result]
+    if name == "ctg":
+        if result == 0:
+            raise TrigonometricError(f"Не существует значения котангенса угла {res} градусов")
+        return sign * trig_values[90 - result] / trig_values[result]
+
+"""
 def in_decimal(obj):
     typ = type(obj).__name__
     if typ in ("sin", "cos", "tg", "ctg"):
@@ -102,6 +131,8 @@ def sort_elems_and_return_answer(elems):
             "tg", "ctg", "arcsin", "arccos", "arctg", "arcctg", "log", "lg",
             "ln", "Variable", "Pi", "Exp", "Integer"].index(type(arg).__name__)
     return sorted(elems, key=for_sort)
+
+"""
 
 def eq(obj, obj2):
     diction = {"Integer": lambda x, y: x.num == y.num, "Pi": lambda x, y: x.num == y.num,

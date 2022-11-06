@@ -133,7 +133,7 @@ class Decode:
         return array
 
     def convert_constants(self, array):
-        diction = {"e": Exp("e"), "π": Pi("π")}
+        diction = {"e": Exp(2.72), "π": Pi(3.14)}
         for i, elem in enumerate(array):
             if elem in diction.keys():
                 result = diction[elem]

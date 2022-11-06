@@ -9,41 +9,43 @@ class Integer:
 
     def __init__(self, num):
         self.num = num
-        self.to_st = lambda: str(self.num)
 
     def update(self):
         return False, self
 
-    def __call__(self):
+    def in_decimal(self):
         return self.num * self.sign
 
-    def get_info(self):
+    def run(self):
         diction = {1: lambda num: "0 - это ничего" if num == 0
                    else "1 - основа натуральных чисел!" if num == 1
                    else f"множители числа <{num}> : {', '.join([str(1)] + get_muls(num))}",
                    -1: lambda num: "0 - это ничего" if num == 0
                    else "1 - основа целых чисел!" if num == 1
                    else f"множители числа <{num}> : {', '.join([str(-1)] + get_muls(num))}"}
-        return diction[self.sign](self.num)
+        out(diction[self.sign](self.num))
 
 
 class Pi(Integer):
-    def get_info(self):
-        return f"""<{π}> равно <{3.14}>
-Число <π> - математическая константа, равная отношению длины окружности к ее диаметру, которое приблизительно равно <3,14>
-Используется для задания углов не в градусах, а в радианах. Например, 180° = π"""
+    def run(self):
+        out("""< π > равно < 3,14 >
+Число < π > - математическая константа, равная отношению длины окружности к ее диаметру, которое приблизительно равно <3,14>
+Используется для задания углов не в градусах, а в радианах. Например, 180° = π""")
 
 
 class Exp(Pi):
-    def get_info(self):
-        return f"""<{e}> равно <{2.72}>.
+    def run(self):
+        out("""< e > равно < 2,72 >.
 Число <e> (число Эйлера) - математическая константа, является базовым соотношением роста для всех непрерывно растущих процессов, которое приблизительно равно <2,72>
-Используется в основании натурального логарифма ln"""
+Используется в основании натурального логарифма ln""")
 
 
 class Variable(Integer):
     def __init__(self, variable):
         self.variable = variable
+
+    def run(self):
+        out(f"{self.variable} - это переменная")
 
 
 # КОНТЕЙНЕРЫ ДЛЯ ОПЕРАЦИЙ
@@ -53,21 +55,11 @@ class Module:
     def __init__(self, cont):
         self.cont = cont
 
-    def update(self):
-        st = to_st(self.cont)
-        result, cont = self.cont.update()
-        while result:
-            st1 = to_st(self)
-            self.cont = cont
-            st2 = to_st(self)
-            out(f"{st1} <=> {st2}")
-            
-            result, cont = self.cont.update()
-        typ, obj = type(self.cont).__name__, self.cont
-        if typ in ("Integer", "Pi", "Exp"):
-            obj.sign = 1
-            return True, obj
-        return False, self    
+    def run(self):
+        pass
+
+    def in_decimal(self):
+        return self.sign * abs(self.cont.in_decimal())
 
 
 class sin:
@@ -76,8 +68,14 @@ class sin:
     def __init__(self, cont):
         self.cont = cont
 
-    def update(self):
-        return False, self
+    def run(self):
+        pass
+
+    def in_decimal(self):
+        trig_values = [float(i) for i in open("txt/sinus_values.txt")]
+        k = 1 if "π" not in to_st(self.cont) else 180 / 3.14
+        res = round(k * self.cont.in_decimal())
+        return reduct_formules(type(self).__name__, self.sign, res)
 
 
 class cos(sin):
@@ -124,12 +122,18 @@ class lg(sin):
 class ln(sin):
     pass
 
-#{'numbers': {'2': <objects.Integer object at 0x000001B654D14790>}, 'consts': {}, 'variables': {}, 'funcs': {}, 'Modules': {}, 'Pows': {}, 'Adds': {'2+2': <objects.Add object at 0x000001B654D149D0>}, 'Muls': {}, 'Radicals': {}, 'Fractions': {}}
+
 class Add:
     sign = 1
 
-    def __init__(self, *objs):
+    def __init__(self, *objs, info):
         self.objs = list(objs)
+
+    def run(self):
+        pass
+
+    def in_decimal(self):
+        return self.sign * sum(elem.in_decimal() for elem in self.objs)
 
     def update(self):
         """
@@ -181,6 +185,12 @@ class Mul:
     def __init__(self, *objs):
         self.objs = list(objs)
 
+    def run(self):
+        pass
+
+    def in_decimal(self):
+        return self.sign * reduce(lambda x, y: x * y, [elem.in_decimal() for elem in self.objs])
+
     def update(self):
         return False, self
 
@@ -190,6 +200,12 @@ class Fraction:
 
     def __init__(self, cont, cont2):
         self.cont, self.cont2 = cont, cont2
+
+    def run(self):
+        pass
+
+    def in_decimal(self):
+        return self.sign * self.cont.in_decimal() / self.cont2.in_decimal()
 
     def update(self):
         
@@ -208,6 +224,12 @@ class Radical:
             raise CalculateError(f"Выражение <{str(cont)}> не может быть отрицательным")
         self.cont = cont
 
+    def run(self):
+        pass
+
+    def in_decimal(self):
+        return self.sign * self.cont.in_decimal()**0.5
+
     def update(self):
         typ, value = type(self.cont).__name__, self.cont
 
@@ -224,6 +246,12 @@ class Pow:
 
     def __init__(self, cont, cont2):
         self.cont, self.cont2 = cont, cont2
+
+    def run(self):
+        pass
+
+    def in_decimal(self):
+        return self.sign * self.cont.in_decimal()**self.cont2.in_decimal()
 
     def update(self):
         return False, self

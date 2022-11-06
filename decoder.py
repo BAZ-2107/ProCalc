@@ -3,7 +3,7 @@ from exceptions import DecodeStringError
 from DecodeExpression import Decode
 from ConvertExpression import Convert
 from output import out
-from functions import to_st, in_decimal
+from functions import to_st
 
 
 def decode_string(st):
@@ -18,22 +18,12 @@ def decode_string(st):
             raise DecodeStringError("В строке более 1 знака отношения")
     if not sign:
         info, res = Decode().decode(st)
-        out(to_st(res))
-        st, typ = to_st(res), type(res).__name__
-        if typ == "Integer":
-            out(f"<{st}> - это число")
-            out(res.get_info())
-        elif typ in ("Pi", "Exp"):
-            out(f"<{st}> - это число")
-            out(res.get_info())
-        elif typ == "Variable":
-            out(f"<{st}> - это переменная")
+        if type(res).__name__ in ("Integer", "Variable", "Pi", "Exp"):
+            res.run()
+        elif not info["variables"]:
+            out(f"Результат вычисления: <{res.in_decimal()}>")
         else:
-            out(f"Распознано как: <{to_st(res)}>")
-            if not info["variables"]:
-                out(f"Результат вычисления: <{in_decimal(res)}>")
-            else:
-                out("Извините, решать буквенные выражения не умею (")
+            out("Извините, решать буквенные выражения не умею (")
             #Convert(res, info).run()
             
     else:
