@@ -17,15 +17,8 @@ def decode_string(st):
         if k > 1:
             raise DecodeStringError("В строке более 1 знака отношения")
     if not sign:
-        info, res = Decode().decode(st)
-        if type(res).__name__ in ("Integer", "Variable", "Pi", "Exp"):
-            res.run()
-        elif not info["variables"]:
-            out(f"Результат вычисления: <{res.in_decimal()}>")
-        else:
-            out("Извините, решать буквенные выражения не умею (")
-            #Convert(res, info).run()
-            
+        res = Decode().decode(st)
+        res.run()
     else:
         if "" in st.split(sign):
             raise DecodeStringError("Знак отношения должен соединять выражения")

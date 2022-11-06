@@ -22,9 +22,13 @@ def one_in_other(obj, obj2):
 def get_muls(num, array=[]):
         if num == 1:
             return array
-        for dl in range(2, num + 1):
+        for dl in [int(i) for i in open("txt/simple_numbers.txt")]:
+            if num % dl == 0:
+                return get_muls(num // dl, array + [str(dl)])        
+        for dl in range(9973, num // 2 + 1):
             if num % dl == 0:
                 return get_muls(num // dl, array + [str(dl)])
+        return get_muls(num // num, array + [str(num)])
 
 def reduct_formules(name, sign, res):
     trig_values = [float(i) for i in open("txt/sinus_values.txt")]

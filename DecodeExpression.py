@@ -17,7 +17,10 @@ class Decode:
         if ("(" in array) or (")" in array):
             self.check_brackets(array)
         elem = self.decode_expression(array)
-        return self.info, elem
+        if type(elem).__name__ in ("Integer", "Variable", "Pi", "Exp"):
+            return elem
+        elem = AlphaExpression(elem) if self.info["variables"] else NumberExpression(elem)
+        return elem
 
     def decode_expression(self, array):
         while "(" in array:

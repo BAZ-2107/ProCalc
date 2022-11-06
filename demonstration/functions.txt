@@ -1,0 +1,1 @@
+arccos arcctg arcsin arctg cos ctg lg ln log sin tg

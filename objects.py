@@ -4,6 +4,24 @@ from output import out
 from exceptions import CalculateError
 from functions import *
 
+class NumberExpression:
+    def __init__(self, exp):
+        self.exp = exp
+
+    def run(self):
+        out(f"Распознано как: <{to_st(self.exp)}>")
+        out(f"Результат вычисления: <{self.exp.in_decimal()}>")
+
+
+class AlphaExpression:
+    def __init__(self, exp):
+        self.exp = exp
+
+    def run(self):
+        out(f"Распознано как: <{to_st(self.exp)}>")
+        out("Извините, решать буквенные выражения не умею (")
+
+
 class Integer:
     sign = 1
 
@@ -126,7 +144,7 @@ class ln(sin):
 class Add:
     sign = 1
 
-    def __init__(self, *objs, info):
+    def __init__(self, *objs):
         self.objs = list(objs)
 
     def run(self):
