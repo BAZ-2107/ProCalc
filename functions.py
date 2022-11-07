@@ -13,6 +13,10 @@ def neg(cont):
     cont.sign *= -1
     return cont
 
+def decode_expression(arg):
+    from DecodeExpression import Decode
+    return Decode().decode(arg.replace(" ", ""))
+    
 
 def one_in_other(obj, obj2):
     typ, typ2 = type(obj).__name__, type(obj2).__name__
@@ -156,8 +160,9 @@ def eq(obj, obj2):
 
 def to_st(obj):
     typ = type(obj).__name__
-    sign = "" if obj.sign == 1 else "-"
-    
+    if typ == "NumberExpression":
+        return to_st(obj.exp)      
+    sign = "" if obj.sign == 1 else "-" 
     if typ == "Integer":
         return sign + str(obj.num)
     if typ == "Pi":

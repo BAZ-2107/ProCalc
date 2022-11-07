@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from exceptions import DecodeStringError
 from DecodeExpression import Decode
-from ConvertExpression import Convert
 from output import out
 from functions import to_st
 

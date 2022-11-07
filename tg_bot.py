@@ -4,7 +4,7 @@ from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, MessageH
 from  for_tg.keyboards import Keyboards
 from main import ProCalc
 from functools import reduce
-from functions import nod, nok
+from functions import nod, nok, decode_expression, to_st
 
 
 def run(update, context):
@@ -31,14 +31,13 @@ def run(update, context):
 
 def NODandNOK(update, context):
     try:
-        array = list(map(int, update.message.text[5:].split()))
-        if any(i < 1 for i in array) or not array:
+        array = [decode_expression(ex).in_decimal() for ex in update.message.text[5:].split(";")]
+        if any((i < 1) or (i % 1) for i in array) or (not array):
             raise Exception
-        word, answer = ("делителем", nod(*array)) if update.message.text[:4] == "/nod" else ("кратным", nok(*array))
-        update.message.reply_text(text=f"Наибольшим общим {word} чисел <{', '.join(list(map(str, array)))}> является число <{answer}>")
-        
+        word, answer = ("Наибольшим общим делителем", nod(*array)) if update.message.text[:4] == "/nod" else ("Наименьшим общим кратным", nok(*array))
+        update.message.reply_text(text=f"{word} чисел <{', '.join(list(map(str, array)))}> является число <{answer}>")
     except Exception:
-        update.message.reply_text(text="Введите, пожалуйста, натуральные числа через пробел. Пример: /nod 6 3 4")
+        update.message.reply_text(text="Введите, пожалуйста, натуральные числа через точку с запятой - <;>. Пример: /nod 6;3;4")
 
 def calc(update, context):
     keyboards.text.text = " "
@@ -46,6 +45,20 @@ def calc(update, context):
 
 def start(update, context):
     update.message.reply_text(text=open("txt/for_start.txt", encoding="utf-8").read().format(update.message.chat.first_name))
+
+def compare(update, context):
+    try:
+        array = [decode_expression(ex) for ex in update.message.text[9:].split(";")]
+        obj, obj2 = array
+        num, num2 = [i.in_decimal() for i in array]
+        if len(array) != 2:
+            raise Exception
+        sign = ">" if (num > num2) else "<" if (num < num2) else "="
+        update.message.reply_text(text=f"""{to_st(obj)} = {num}
+{to_st(obj2)} = {num2}
+{num} {sign} {num2} <=> {to_st(obj)} {sign} {to_st(obj2)}""")
+    except Exception:
+        update.message.reply_text(text="Введите, пожалуйста, 2 числа или выражения через точку с запятой - <;>. Пример: /compare 6;4")
 
 def help(update, context):
     update.message.reply_text(text=open("txt/for_help.txt", encoding="utf-8").read().format(update.message.chat.first_name))
@@ -64,6 +77,7 @@ if __name__ == '__main__': # запуск программы
     dispatcher.add_handler(CommandHandler("calc", calc))
     dispatcher.add_handler(CommandHandler("nod", NODandNOK))
     dispatcher.add_handler(CommandHandler("nok", NODandNOK))
+    dispatcher.add_handler(CommandHandler("compare", compare))
     dispatcher.add_handler(CallbackQueryHandler(run))
     dispatcher.add_handler(MessageHandler(Filters.text, message_input))
     keyboards = Keyboards()

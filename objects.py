@@ -10,7 +10,10 @@ class NumberExpression:
 
     def run(self):
         out(f"Распознано как: <{to_st(self.exp)}>")
-        out(f"Результат вычисления: <{self.exp.in_decimal()}>")
+        out(f"Результат вычисления: <{self.in_decimal()}>")
+
+    def in_decimal(self):
+        return self.exp.in_decimal()
 
 
 class AlphaExpression:
@@ -218,6 +221,8 @@ class Fraction:
 
     def __init__(self, cont, cont2):
         self.cont, self.cont2 = cont, cont2
+        if type(cont2).__name__ != "AlphaExpression" and cont2.in_decimal() == 0:
+            raise CalculateError(f"<{to_st(cont2)}> == 0, делить на ноль нельзя")
 
     def run(self):
         pass
