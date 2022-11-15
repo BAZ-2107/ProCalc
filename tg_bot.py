@@ -34,7 +34,6 @@ def NODandNOK(update, context):
         array = [decode_expression(ex).in_decimal() for ex in update.message.text[5:].split(";")]
         if any((i < 1) or (i % 1) for i in array) or (not array):
             raise Exception
-        array = list(map(int, array))
         word, answer = ("Наибольшим общим делителем", nod(*array)) if update.message.text[:4] == "/nod" else ("Наименьшим общим кратным", nok(*array))
         update.message.reply_text(text=f"{word} чисел <{', '.join(list(map(str, array)))}> является число <{answer}>")
     except Exception:

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from functools import reduce
-from exceptions import TrigonometricError
 
 change_sign_in_add = lambda add: list(map(lambda obj: neg(obj), add.objs)) # вызывается, когда знак выражения отрицательный. Возвращает противоположные элементы
 
@@ -33,114 +32,6 @@ def get_muls(num, array=[]):
             if num % dl == 0:
                 return get_muls(num // dl, array + [str(dl)])
         return get_muls(num // num, array + [str(num)])
-
-def reduct_formules(name, sign, res):
-    trig_values = [float(i) for i in open("txt/sinus_values.txt")]
-    result = res % 360
-    if 90 < result <= 180:
-            result = 180 - result
-            if name != "sin":
-                sign *= -1
-    elif 180 < result <= 270:
-        result -= 180
-        if name in ("sin", "cos"):
-            sign *= -1
-    elif 270 < result < 360:
-        result = 360 - result
-        if name != "cos":
-            sign *= -1
-    if name == "sin":
-        return sign * trig_values[result]
-    if name == "cos":
-        return sign * trig_values[90 - result]
-    if name == "tg":
-        if result == 90:
-            raise TrigonometricError(f"Не существует значения тангенса угла {res} градусов")
-        return sign * trig_values[result] / trig_values[90 - result]
-    if name == "ctg":
-        if result == 0:
-            raise TrigonometricError(f"Не существует значения котангенса угла {res} градусов")
-        return sign * trig_values[90 - result] / trig_values[result]
-
-"""
-def in_decimal(obj):
-    typ = type(obj).__name__
-    if typ in ("sin", "cos", "tg", "ctg"):
-        trig_values = [float(i) for i in open("txt/sinus_values.txt")]
-        k = 1 if "π" not in to_st(obj.cont) else 180 / 3.14
-        res = round(k * in_decimal(obj.cont))
-        result = res % 360
-        sign = 1
-        if 90 < result <= 180:
-            result = 180 - result
-            if typ != "sin":
-                sign = -1
-        elif 180 < result <= 270:
-            result -= 180
-            if typ in ("sin", "cos"):
-                sign = -1
-        elif 270 < result < 360:
-            result = 360 - result
-            if typ != "cos":
-                sign = -1
-
-        if typ == "sin":
-            return sign * trig_values[result]
-        if typ == "cos":
-            return sign * trig_values[90 - result]
-        if typ == "tg":
-            if result == 90:
-                raise TrigonometricError(f"Не существует значения тангенса угла {res} градусов")
-            return sign * trig_values[result] / trig_values[90 - result]
-        if typ == "ctg":
-            if result == 0:
-                raise TrigonometricError(f"Не существует значения котангенса угла {res} градусов")
-            return sign * trig_values[90 - result] / trig_values[result]
-
-    elif typ in ("arcsin", "arccos", "arctg", "arccctg"):
-        trig_values = [float(i) for i in open("txt/sinus_values.txt")]
-        res = round(in_decimal(obj.cont), 4)
-        if typ in ("arcsin", "arccos"):
-            if abs(res) > 1:
-                raise TrigonometricError(f"Не существует такого значения синуса или косинуса: {res} ")
-            result = min(range(0, 91), key=lambda x: abs(trig_values[x] - abs(res)))
-            if typ == "arcsin":
-                if res < 0:
-                    return -result
-                return result
-            elif typ == "arccos":
-                if res < 0:
-                    return 90 + result               
-                return 90 - result
-
-    diction = {"Integer": lambda obj: obj.num,
-               "Pi": lambda obj: 3.14,
-               "Exp": lambda obj: 2.72,
-               "Mul": lambda obj: reduce(lambda el, el2: el * el2, [in_decimal(i) for i in obj.objs]),
-               "Add": lambda obj: sum([in_decimal(i) for i in obj.objs]),
-               "Fraction": lambda obj: in_decimal(obj.cont) / in_decimal(obj.cont2),
-               "Pow": lambda obj: in_decimal(obj.cont)**in_decimal(obj.cont2),
-               "Module": lambda obj: abs(in_decimal(obj.cont)),
-               "Radical": lambda obj: in_decimal(obj.cont)**0.5}
-    return obj.sign * diction.get(type(obj).__name__)(obj)
-
-def add__in_objs(objs): # вызывается, когда среди слагаемых есть объект Add. Рекурсивно возвращает объект, у которого нет среди слагаемых Add
-    if not "Add" in [type(elem).__name__ for elem in objs]:
-        return objs
-    for i, elem in enumerate(objs):
-        if type(elem).__name__ == "Add":
-            del objs[i]
-            array = [neg(j) for j in elem.objs] if elem.sign == -1 else elem.objs
-            objs = objs[:i] + array + objs[i:]
-            return add__in_objs(objs)
-
-def sort_elems_and_return_answer(elems):
-    for_sort = lambda arg: ["Mul", "Fraction", "Pow", "Radical", "Module", "sin", "cos",
-            "tg", "ctg", "arcsin", "arccos", "arctg", "arcctg", "log", "lg",
-            "ln", "Variable", "Pi", "Exp", "Integer"].index(type(arg).__name__)
-    return sorted(elems, key=for_sort)
-
-"""
 
 def eq(obj, obj2):
     diction = {"Integer": lambda x, y: x.num == y.num, "Pi": lambda x, y: x.num == y.num,

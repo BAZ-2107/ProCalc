@@ -15,3 +15,6 @@ class CalculateError(Exception):
 
 class TrigonometricError(Exception):
     pass
+
+class LogarithmicError(Exception):
+    pass

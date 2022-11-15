@@ -27,6 +27,8 @@ class ProCalc:
             out("Ошибка! " + str(message))
         except TrigonometricError as message:
             out("Ошибка! " + str(message))
+        except LogarithmicError as message:
+            out("Ошибка! " + str(message))        
         except Exception as message:
             out("Ошибка: " + str(message))
         finally:
