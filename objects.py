@@ -107,17 +107,17 @@ class cos(sin):
 class tg(sin):
     def in_decimal(self):
         k = lambda x: radians(x) if "π" not in to_st(self.cont) else x
-        s, с = sinn(k(self.cont.in_decimal())), coss(k(self.cont.in_decimal()))
-        if c == 0:
+        s, c = sinn(k(self.cont.in_decimal())), coss(k(self.cont.in_decimal()))
+        if round(c, 10) == 0:
             raise TrigonometricError("Значения тангенса данного угла не существует")
         return round(s / c, 4)
         
     
 class ctg(sin):
     def in_decimal(self):
-        k = 180 if "π" not in to_st(self.cont) else 1
-        s, с = sinn(k(self.cont.in_decimal())), coss(k(self.cont.in_decimal()))
-        if s == 0:
+        k = lambda x: radians(x) if "π" not in to_st(self.cont) else x
+        s, c = sinn(k(self.cont.in_decimal())), coss(k(self.cont.in_decimal()))
+        if round(s, 10) == 0:
             raise TrigonometricError("Значения котангенса данного угла не существует")
         return round(c / s, 4)
 

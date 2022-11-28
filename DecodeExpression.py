@@ -4,15 +4,14 @@ from functions import to_st
 from objects import *
 
 class Decode:
-    info = {"numbers": {}, "consts": {}, "variables": {}, "funcs": {}, "Modules": {},
-            "Pows": {}, "Adds": {}, "Muls": {}, "Radicals": {}, "Fractions": {}}
-
     f = open("txt/functions.txt", "r")
     functions = f.read().split()
     f.close()
     
 
     def decode(self, st):
+        self.info = {"numbers": {}, "consts": {}, "variables": {}, "funcs": {}, "Modules": {},
+                "Pows": {}, "Adds": {}, "Muls": {}, "Radicals": {}, "Fractions": {}}        
         array = list(st)
         if ("(" in array) or (")" in array):
             self.check_brackets(array)
@@ -55,7 +54,7 @@ class Decode:
         k = 0
         for i, ch in enumerate(array):
             if ismodulebracket(ch):
-                if (k == 0) or (i != 0 and issign(array[i - 1])):
+                if (k == 0) or ((i != 0) and issign(array[i - 1])):
                     array[i], k = "[", k + 1
                 else:
                     array[i], k = "]", k - 1
@@ -136,7 +135,7 @@ class Decode:
         return array
 
     def convert_constants(self, array):
-        diction = {"e": Exp(2.72), "π": Pi(3.14)}
+        diction = {"e": Exp(2.718281828459045), "π": Pi(3.141592653589793)}
         for i, elem in enumerate(array):
             if elem in diction.keys():
                 result = diction[elem]
@@ -267,10 +266,10 @@ class Decode:
                 self.info[diction[elem_1]][to_st(result)] = result
                 array[i] = result
                 del array[i-2:i]
-
         return array
-#a = Decode().decode("log^28,0ab")
-#print(str(a), type(a))
+
+
+#a = Decode().decode("3+||3||3||")
 """
 objects:
     number 0123456789,
