@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-
+import json
 import vk_api
-from vk_api.longpoll import VkLongPoll, VkEventType
-from vk_api.keyboard import VkKeyboard
-
+from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
+from for_vk.keyboards import Keyboards
 from main import ProCalc
 from functools import reduce
 from functions import nod, nok, decode_expression, to_st
@@ -23,12 +22,10 @@ def compare(message):
         return "Введите, пожалуйста, 2 числа или выражения через точку с запятой - <;>. Пример: /compare 6;4"
 
 def start():
-    return "Здравствуйте" + open("txt/for_start.txt", encoding="utf-8").read().replace("""
-  Также можно воспользоваться командой /calc, которая запустит клавиатуру для набора символов""", "")[20:]
+    return "Здравствуйте" + open("txt/for_start.txt", encoding="utf-8").read()
 
 def help():
-    return "Здравствуйте" + open("txt/for_help.txt", encoding="utf-8").read().replace("""
-  Если Вам неудобно набирать символы со своей клавиатуры, есть вариант воспользоваться командой /calc, которая предложит инлайн-клавиатуру""", "")[20:]
+    return "Здравствуйте" + open("txt/for_help.txt", encoding="utf-8").read()
 
 def NODandNOK(msg):
     try:
@@ -41,24 +38,55 @@ def NODandNOK(msg):
         return "Введите, пожалуйста, натуральные числа через точку с запятой - <;>. Пример: /nod 6;3;4"
 
 if __name__ == "__main__":
-    token = 'vk1.a.zrBGSLszP1RY13KVd9cNcD0lWT3xwJ0HYF0guNsRHI8goG-qvW3bvxhSpymn3LSdp-nNe_t_Zn2eVvlqCzwEHtYpBfT_ZEICATGvnlXyRrVcbSDbNhPdiQqTDuik-L9JTKk-qZhzrLxIsOkzCSrQw7u4gFO98f12eIGzCbrw41W1pjkZeU7bhiperAfd0Vp1'
-    vk_session = vk_api.VkApi(token=token)
+    group_id = '211987060'
+    token = 'vk1.a.AwdM7xE1N5oXMwF29sKbLeRZrCDw7CYmjSpHER1Zj_8o1rmAHdenPoPh2UYsjlrv6ejzTIA9pealqDZ3Ix0743pgPYj-dYiHgsa0QcSlu02L_uP7R8muUE2Smrpe3vCibIREm401xvp9hrEenHiGZb9bk3jl5LtlDViHgRxl4McmgPUyaCozQVkjFBQtWjclQcvU9YzAl34OIYqj6lAapw'
+    API_VERSION = '5.131'
+    
+
+    vk_session = vk_api.VkApi(token=token, api_version=API_VERSION)
     vk = vk_session.get_api()
-    keyboard = VkKeyboard(inline=True)
-    keyboard.add_button("Hi")
-    longpoll = VkLongPoll(vk_session)
+    longpoll = VkBotLongPoll(vk_session, group_id=group_id)
+    keyboard = Keyboards()
+
     for event in longpoll.listen():
-        if event.type == VkEventType.MESSAGE_NEW and event.to_me:
-            msg = event.text
-            if "/compare" in msg and msg.find("/compare") == 0:
-                result = compare(msg)
-            elif ("/nok" in msg and msg.find("/nok") == 0) or ("/nod" in msg and msg.find("/nod") == 0):
-                result = NODandNOK(msg)
-            elif "/start" in msg and msg.find("/start") == 0:
+        if event.type == VkBotEventType.MESSAGE_NEW:
+            id = event.obj.message['from_id']
+            msg = event.obj.message['text']
+            if ("/start" in msg and msg.find("/start") == 0) or msg == "Начать":
                 result = start()
-            elif "/help" in msg and msg.find("/help") == 0:
-                result = help()            
+                vk.messages.send(user_id=id, keyboard=keyboard.keyboard1.get_keyboard(), message=result, random_id=0)
+            elif "/calc" in msg and msg.find("/calc") == 0:
+                vk.messages.send(user_id=id, keyboard=keyboard.keyboard2.get_keyboard(), message="Введите выражение с помощью клавиатуры", random_id=0)
             else:
+                if "/compare" in msg and msg.find("/compare") == 0:
+                    result = compare(msg)
+                elif ("/nok" in msg and msg.find("/nok") == 0) or ("/nod" in msg and msg.find("/nod") == 0):
+                    result = NODandNOK(msg)
+                elif "/help" in msg and msg.find("/help") == 0:
+                    result = help()
+                else:
+                    result = ProCalc().run(msg)
+                vk.messages.send(user_id=id, message=result, random_id=0)
+        elif event.type == VkBotEventType.MESSAGE_EVENT:
+            id = event.object['user_id']
+            typ = event.object.payload.get('type')
+            if typ == "hide":
+                vk.messages.send(user_id=id, message="Меню", keyboard=keyboard.keyboard1.get_keyboard(), random_id=0)
+            elif typ == "funcs":
+                vk.messages.send(user_id=id, message="Функции", keyboard=keyboard.keyboard3.get_keyboard(), random_id=0)
+            elif typ == "back":
+                vk.messages.send(user_id=id, message="Главная", keyboard=keyboard.keyboard2.get_keyboard(), random_id=0)         
+            elif typ == "run":
+                msg = keyboard.keyboard2.keyboard["buttons"][0][0]["action"]["label"]
                 result = ProCalc().run(msg)
-            id = event.user_id
-            vk.messages.send(user_id=id, message=result, random_id=0)
+                vk.messages.send(user_id=id, message=result, random_id=0)
+            elif typ != "main":
+                info = vk.messages.getHistory(peer_id=event.object.peer_id)['items'][0]
+                message_id, peer_id = info['id'], info['peer_id']
+                if typ == "❌":
+                    keyboard.clear()
+                elif typ == "⌫":
+                    keyboard.del_one_symbol()
+                else:
+                    keyboard.add_symbol(typ)
+                vk.messages.edit(peer_id=peer_id, message_id=message_id, message=f'Введите выражение с помощью клавиатуры', keyboard=keyboard.keyboard2.get_keyboard(), random_id=0)
