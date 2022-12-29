@@ -33,6 +33,11 @@ class Keyboards:
     keyboard3.add_callback_button(label='❌', payload={"type": "❌"}, color=color)
     keyboard3.add_callback_button(label='Назад', payload={"type": "back"}, color=color)
 
+    for_calc = keyboard2
+
+    def change_keyboard(self):
+        self.for_calc = self.keyboard3 if self.for_calc == self.keyboard2 else self.keyboard2
+
     def add_symbol(self, symbol):
         label = self.keyboard2.keyboard["buttons"][0][0]["action"]["label"]
         if len(label) == 1 and label == "✍":
