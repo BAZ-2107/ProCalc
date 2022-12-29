@@ -95,13 +95,13 @@ class sin:
 
     def in_decimal(self):
         k = lambda x: radians(x) if "π" not in to_st(self.cont) else x
-        return round(sinn(k(self.cont.in_decimal())), 4)
+        return self.sign * round(sinn(k(self.cont.in_decimal())), 4)
 
 
 class cos(sin):
     def in_decimal(self):
         k = lambda x: radians(x) if "π" not in to_st(self.cont) else x
-        return round(coss(k(self.cont.in_decimal())), 4)
+        return self.sign * round(coss(k(self.cont.in_decimal())), 4)
 
 
 class tg(sin):
@@ -110,7 +110,7 @@ class tg(sin):
         s, c = sinn(k(self.cont.in_decimal())), coss(k(self.cont.in_decimal()))
         if round(c, 10) == 0:
             raise TrigonometricError("Значения тангенса данного угла не существует")
-        return round(s / c, 4)
+        return self.sign * round(s / c, 4)
         
     
 class ctg(sin):
@@ -119,7 +119,7 @@ class ctg(sin):
         s, c = sinn(k(self.cont.in_decimal())), coss(k(self.cont.in_decimal()))
         if round(s, 10) == 0:
             raise TrigonometricError("Значения котангенса данного угла не существует")
-        return round(c / s, 4)
+        return self.sign * round(c / s, 4)
 
 
 class arcsin(sin):
@@ -127,7 +127,7 @@ class arcsin(sin):
         res = self.cont.in_decimal()
         if abs(res) > 1:
             raise TrigonometricError("Аргумент арксинуса не должен превышать 1")
-        return round(degrees(asin(res)), 4)
+        return self.sign * round(degrees(asin(res)), 4)
         
         
 class arccos(sin):
@@ -135,20 +135,20 @@ class arccos(sin):
         res = self.cont.in_decimal()
         if abs(res) > 1:
             raise TrigonometricError("Аргумент арксинуса не должен превышать 1")
-        return round(degrees(acos(res)), 4)
+        return self.sign * round(degrees(acos(res)), 4)
 
 
 class arctg(sin):
     def in_decimal(self):
-        return round(degrees(atan(self.cont.in_decimal())), 4)
+        return self.sign * round(degrees(atan(self.cont.in_decimal())), 4)
 
 
 class arcctg(sin):
     def in_decimal(self):
         res = round(degrees(atan(self.cont.in_decimal())), 4)
         if res >= 0:
-            return 90 - res
-        return -90 - res
+            return self.sign * (90 - res)
+        return self.sign * (-90 - res)
 
 class log:
     sign = 1
@@ -165,14 +165,14 @@ class log:
             raise LogarithmicError("Основание не может быть равным 1 или быть не больше  0")
         if arg <= 0:
             raise LogarithmicError("Аргумент логарифма не может быть не больше  0")
-        return round(logg(arg, base), 4)
+        return self.sign * round(logg(arg, base), 4)
 
 class lg(sin):
     def in_decimal(self):
         arg = self.cont.in_decimal()
         if arg <= 0:
             raise LogarithmicError("Аргумент логарифма не может быть не больше  0")
-        return round(log10(arg), 4)
+        return self.sign * round(log10(arg), 4)
 
 
 class ln(sin):
@@ -180,7 +180,7 @@ class ln(sin):
         arg = self.cont.in_decimal()
         if arg <= 0:
             raise LogarithmicError("Аргумент логарифма не может быть не больше  0")
-        return round(log1p(arg), 4)
+        return self.sign * round(log1p(arg), 4)
 
 
 class Add:

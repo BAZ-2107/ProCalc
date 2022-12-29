@@ -22,10 +22,10 @@ def compare(message):
         return "Введите, пожалуйста, 2 числа или выражения через точку с запятой - <;>. Пример: /compare 6;4"
 
 def start():
-    return "Здравствуйте" + open("txt/for_start.txt", encoding="utf-8").read()
+    return open("txt/for_start.txt", encoding="utf-8").read()
 
 def help():
-    return "Здравствуйте" + open("txt/for_help.txt", encoding="utf-8").read()
+    return open("txt/for_help.txt", encoding="utf-8").read()
 
 def NODandNOK(msg):
     try:
@@ -53,10 +53,11 @@ if __name__ == "__main__":
             id = event.obj.message['from_id']
             msg = event.obj.message['text']
             if ("/start" in msg and msg.find("/start") == 0) or msg == "Начать":
+                print(event.object)
                 result = start()
                 vk.messages.send(user_id=id, keyboard=keyboard.keyboard1.get_keyboard(), message=result, random_id=0)
             elif "/calc" in msg and msg.find("/calc") == 0:
-                vk.messages.send(user_id=id, keyboard=keyboard.keyboard2.get_keyboard(), message="Введите выражение с помощью клавиатуры", random_id=0)
+                vk.messages.send(user_id=id, keyboard=keyboard.for_calc.get_keyboard(), message="Введите выражение с помощью клавиатуры", random_id=0)
             else:
                 if "/compare" in msg and msg.find("/compare") == 0:
                     result = compare(msg)
@@ -70,16 +71,15 @@ if __name__ == "__main__":
         elif event.type == VkBotEventType.MESSAGE_EVENT:
             id = event.object['user_id']
             typ = event.object.payload.get('type')
+            if typ in ("funcs", "back"):
+                keyboard.change_keyboard() 
             if typ == "hide":
                 vk.messages.send(user_id=id, message="Меню", keyboard=keyboard.keyboard1.get_keyboard(), random_id=0)
-            elif typ == "funcs":
-                vk.messages.send(user_id=id, message="Функции", keyboard=keyboard.keyboard3.get_keyboard(), random_id=0)
-            elif typ == "back":
-                vk.messages.send(user_id=id, message="Главная", keyboard=keyboard.keyboard2.get_keyboard(), random_id=0)         
             elif typ == "run":
                 msg = keyboard.keyboard2.keyboard["buttons"][0][0]["action"]["label"]
                 result = ProCalc().run(msg)
-                vk.messages.send(user_id=id, message=result, random_id=0)
+                keyboard.clear()
+                vk.messages.send(user_id=id, message=result, keyboard=keyboard.keyboard1.get_keyboard(), random_id=0)
             elif typ != "main":
                 info = vk.messages.getHistory(peer_id=event.object.peer_id)['items'][0]
                 message_id, peer_id = info['id'], info['peer_id']
@@ -87,6 +87,6 @@ if __name__ == "__main__":
                     keyboard.clear()
                 elif typ == "⌫":
                     keyboard.del_one_symbol()
-                else:
+                elif typ not in ("funcs", "back"):
                     keyboard.add_symbol(typ)
-                vk.messages.edit(peer_id=peer_id, message_id=message_id, message=f'Введите выражение с помощью клавиатуры', keyboard=keyboard.keyboard2.get_keyboard(), random_id=0)
+                vk.messages.edit(peer_id=peer_id, message_id=message_id, message="Введите выражение с помощью клавиатуры", keyboard=keyboard.for_calc.get_keyboard(), random_id=0)

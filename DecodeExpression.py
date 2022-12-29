@@ -269,7 +269,7 @@ class Decode:
         return array
 
 
-#a = Decode().decode("3+||3||3||")
+#a = Decode().decode("3+||3|*|3||")
 """
 objects:
     number 0123456789,

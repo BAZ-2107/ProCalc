@@ -9,25 +9,33 @@ from functions import nod, nok, decode_expression, to_st
 
 def run(update, context):
     query = update.callback_query
+    label = keyboards.text.text
     if query.data == "text":
         pass
-    elif query.data == "running":
+    elif query.data == "✅":
         result = ProCalc().run(keyboards.text.text)
-        keyboards.text.text = " "
+        keyboards.text.text = "✍"
         query.edit_message_text(text=result)
     else:
-        if query.data == "CE":
-            if len(keyboards.text.text) != 1:
-                keyboards.text.text = keyboards.text.text[:-1]
-        elif query.data == "C":
-            if keyboards.text.text != " ":
-                keyboards.text.text = " "
-        elif query.data in ("letters", "back"):
+        if query.data == "⌫":
+            if len(label) == 1:
+                keyboards.text.text = "✍"
+            else:
+                keyboards.text.text = label[:-1]
+        elif query.data == "❌":
+            keyboards.text.text = "✍"
+        elif query.data in ("funcs", "back"):
             keyboards.change_calc_keyboard()
         else:
-            keyboards.text.text += query.data
+            if label != "✍":
+                keyboards.text.text += query.data
+            else:
+                keyboards.text.text = query.data
         query.answer()
-        query.edit_message_text(text="Введите выражение", reply_markup=keyboards.for_calc)
+        try:
+            query.edit_message_text(text="Введите выражение", reply_markup=keyboards.for_calc)
+        except Exception:
+            pass
 
 def NODandNOK(update, context):
     try:
@@ -40,11 +48,11 @@ def NODandNOK(update, context):
         update.message.reply_text(text="Введите, пожалуйста, натуральные числа через точку с запятой - <;>. Пример: /nod 6;3;4")
 
 def calc(update, context):
-    keyboards.text.text = " "
+    keyboards.text.text = "✍"
     update.message.reply_text(text="Введите выражение", reply_markup=keyboards.for_calc)
 
 def start(update, context):
-    update.message.reply_text(text=open("txt/for_start.txt", encoding="utf-8").read().format(update.message.chat.first_name))
+    update.message.reply_text(text=open("txt/for_start.txt", encoding="utf-8").read())
 
 def compare(update, context):
     try:
@@ -61,14 +69,14 @@ def compare(update, context):
         update.message.reply_text(text="Введите, пожалуйста, 2 числа или выражения через точку с запятой - <;>. Пример: /compare 6;4")
 
 def help(update, context):
-    update.message.reply_text(text=open("txt/for_help.txt", encoding="utf-8").read().format(update.message.chat.first_name))
+    update.message.reply_text(text=open("txt/for_help.txt", encoding="utf-8").read())
 
 def message_input(update, context):
     result = ProCalc().run(update.message.text)
     update.message.reply_text(text=result)
 
 
-if __name__ == '__main__': # запуск программы    
+if __name__ == '__main__': # запуск программы
     TOKEN = "5470284710:AAH5J030yTMQsPH1R64ZjcES_8z6ZIE407U" # токен бота
     updater = Updater(token=TOKEN, use_context=True) # создание объекта, осуществляющего связь между ботом и пользователем
     dispatcher = updater.dispatcher
