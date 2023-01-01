@@ -14,7 +14,7 @@ class NumberExpression:
         out(f"Результат вычисления: <{self.in_decimal()}>")
 
     def in_decimal(self):
-        return self.exp.in_decimal()
+        return round(self.exp.in_decimal(), 6)
 
 
 class AlphaExpression:
@@ -95,13 +95,13 @@ class sin:
 
     def in_decimal(self):
         k = lambda x: radians(x) if "π" not in to_st(self.cont) else x
-        return self.sign * round(sinn(k(self.cont.in_decimal())), 4)
+        return self.sign * sinn(k(self.cont.in_decimal()))
 
 
 class cos(sin):
     def in_decimal(self):
         k = lambda x: radians(x) if "π" not in to_st(self.cont) else x
-        return self.sign * round(coss(k(self.cont.in_decimal())), 4)
+        return self.sign * coss(k(self.cont.in_decimal()))
 
 
 class tg(sin):
@@ -110,7 +110,7 @@ class tg(sin):
         s, c = sinn(k(self.cont.in_decimal())), coss(k(self.cont.in_decimal()))
         if round(c, 10) == 0:
             raise TrigonometricError("Значения тангенса данного угла не существует")
-        return self.sign * round(s / c, 4)
+        return self.sign * (s / c)
         
     
 class ctg(sin):
@@ -119,7 +119,7 @@ class ctg(sin):
         s, c = sinn(k(self.cont.in_decimal())), coss(k(self.cont.in_decimal()))
         if round(s, 10) == 0:
             raise TrigonometricError("Значения котангенса данного угла не существует")
-        return self.sign * round(c / s, 4)
+        return self.sign * (c / s)
 
 
 class arcsin(sin):
@@ -127,7 +127,7 @@ class arcsin(sin):
         res = self.cont.in_decimal()
         if abs(res) > 1:
             raise TrigonometricError("Аргумент арксинуса не должен превышать 1")
-        return self.sign * round(degrees(asin(res)), 4)
+        return self.sign * degrees(asin(res))
         
         
 class arccos(sin):
@@ -135,17 +135,17 @@ class arccos(sin):
         res = self.cont.in_decimal()
         if abs(res) > 1:
             raise TrigonometricError("Аргумент арксинуса не должен превышать 1")
-        return self.sign * round(degrees(acos(res)), 4)
+        return self.sign * degrees(acos(res))
 
 
 class arctg(sin):
     def in_decimal(self):
-        return self.sign * round(degrees(atan(self.cont.in_decimal())), 4)
+        return self.sign * degrees(atan(self.cont.in_decimal())), 4
 
 
 class arcctg(sin):
     def in_decimal(self):
-        res = round(degrees(atan(self.cont.in_decimal())), 4)
+        res = degrees(atan(self.cont.in_decimal()))
         if res >= 0:
             return self.sign * (90 - res)
         return self.sign * (-90 - res)
@@ -165,14 +165,14 @@ class log:
             raise LogarithmicError("Основание не может быть равным 1 или быть не больше  0")
         if arg <= 0:
             raise LogarithmicError("Аргумент логарифма не может быть не больше  0")
-        return self.sign * round(logg(arg, base), 4)
+        return self.sign * logg(arg, base)
 
 class lg(sin):
     def in_decimal(self):
         arg = self.cont.in_decimal()
         if arg <= 0:
             raise LogarithmicError("Аргумент логарифма не может быть не больше  0")
-        return self.sign * round(log10(arg), 4)
+        return self.sign * log10(arg)
 
 
 class ln(sin):
@@ -180,7 +180,7 @@ class ln(sin):
         arg = self.cont.in_decimal()
         if arg <= 0:
             raise LogarithmicError("Аргумент логарифма не может быть не больше  0")
-        return self.sign * round(log1p(arg), 4)
+        return self.sign * log1p(arg)
 
 
 class Add:
@@ -280,16 +280,15 @@ class Radical:
     sign = 1
 
     def __init__(self, cont):
-        answer, cont2 = cont.update()
-        typ, value = type(cont2).__name__, cont2
-        if typ in ["Pi", "Exp", "Integer"] and value.sign == -1:
-            raise CalculateError(f"Выражение <{str(cont)}> не может быть отрицательным")
         self.cont = cont
 
     def run(self):
         pass
 
     def in_decimal(self):
+        res = self.cont.in_decimal()
+        if res < 0:
+            raise CalculateError(f"Подкоренное выражение не может быть отрицательным: <{to_st(self.cont)}>")
         return self.sign * self.cont.in_decimal()**0.5
 
     def update(self):
@@ -313,7 +312,12 @@ class Pow:
         pass
 
     def in_decimal(self):
-        return self.sign * self.cont.in_decimal()**self.cont2.in_decimal()
+        base, index = self.cont.in_decimal(), self.cont2.in_decimal()
+        if (base < 0) and (index % 1):
+            raise CalculateError(f"Отрицательное число <{to_st(self.cont)}> нельзя возводить в степень с дробным показателем <{to_st(self.cont2)}>")
+        if (base == 0) and (index <= 0):
+            raise CalculateError(f"Ноль <{to_st(self.cont)}> нельзя возводить в нулевую или отрицательную степень <{to_st(self.cont2)}>")
+        return self.sign * base**index
 
     def update(self):
         return False, self
