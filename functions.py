@@ -28,7 +28,7 @@ def get_muls(num, array=[]):
         for dl in [int(i) for i in open("txt/simple_numbers.txt")]:
             if num % dl == 0:
                 return get_muls(num // dl, array + [str(dl)])        
-        for dl in range(9973, num // 2 + 1):
+        for dl in range(99991, num // 2 + 1):
             if num % dl == 0:
                 return get_muls(num // dl, array + [str(dl)])
         return get_muls(num // num, array + [str(num)])
