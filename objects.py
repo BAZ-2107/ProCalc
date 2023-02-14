@@ -14,7 +14,18 @@ class NumberExpression:
         out(f"Результат вычисления: <{self.in_decimal()}>")
 
     def in_decimal(self):
-        return round(self.exp.in_decimal(), 6)
+        res = self.exp.in_decimal()
+        if abs(res) < 10**-4:
+            k = 0
+            while abs(res) < 1:
+                res, k = res * 10, k + 1
+            return f"{round(res, 6)}*10^({-k})"
+        if abs(res) > 10**5:
+            k = 0
+            while abs(res) > 10:
+                res, k = res / 10, k + 1
+            return f"{round(res, 6)}*10^{k}"
+        return round(res, 6)
 
 
 class AlphaExpression:
