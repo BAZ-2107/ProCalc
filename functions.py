@@ -1,12 +1,37 @@
 # -*- coding: utf-8 -*-
 from functools import reduce
 
-change_sign_in_add = lambda add: list(map(lambda obj: neg(obj), add.objs)) # вызывается, когда знак выражения отрицательный. Возвращает противоположные элементы
 
+alpha = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+converting_to_decimal_int = lambda a, ss: sum(alpha.index(a[-i-1])*ss**i for i in range(len(a)))
+converting_to_decimal_float = lambda a, ss: sum(alpha.index(a[i])*ss**(-i-1) for i in range(len(a)))
+
+
+def converting_one_in_other(one, ss1, ss2):
+    global alpha
+    if any(alpha[ss1] <= i for i in one):
+        raise Exception
+    st, st2 = "", ""
+    n, mod = (converting_to_decimal_int(one, ss1), None) if "," not in one else (converting_to_decimal_int(one.split(",")[0], ss1), converting_to_decimal_float(one.split(",")[-1], ss1))
+    while n:
+        st += alpha[n % ss2]
+        n //= ss2
+    if mod:
+        st = "," + st
+        k, st2 = 0, ""
+        while not (k == 6 or (mod % 1) == 0):
+            mod *= ss2
+            st2 += alpha[int(mod // 1)]
+            mod %= 1
+            k += 1
+    return f"{st[::-1]}{st2}"
+
+
+change_sign_in_add = lambda add: list(map(lambda obj: neg(obj), add.objs)) # вызывается, когда знак выражения отрицательный. Возвращает противоположные элементы
 simple_nod = lambda a, b: a if b == 0 else simple_nod(b, a % b)
 nod = lambda *args: reduce(lambda x, y: simple_nod(x, y), args)
-
 nok = lambda *args: reduce(lambda x, y: x * y // nod(x, y), args)
+
 
 def neg(cont):
     cont.sign *= -1

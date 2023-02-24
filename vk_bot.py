@@ -48,13 +48,12 @@ def main():
         vk = vk_session.get_api()
         longpoll = VkBotLongPoll(vk_session, group_id=group_id)
         keyboard = Keyboards()
-    
+        print(longpoll.VkLongpollMode(6))
         for event in longpoll.listen():
             if event.type == VkBotEventType.MESSAGE_NEW:
                 id = event.obj.message['from_id']
                 msg = event.obj.message['text']
                 if ("/start" in msg and msg.find("/start") == 0) or msg == "Начать":
-                    print(event.object)
                     result = start()
                     vk.messages.send(user_id=id, keyboard=keyboard.keyboard1.get_keyboard(), message=result, random_id=0)
                 elif "/calc" in msg and msg.find("/calc") == 0:
