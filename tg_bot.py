@@ -4,7 +4,7 @@ from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, MessageH
 from  for_tg.keyboards import Keyboards
 from main import ProCalc
 from functools import reduce
-from functions import nod, nok, decode_expression, to_st, get_muls, converting_one_in_other
+from functions import nod, nok, decode_expression, to_st, get_muls, converting_one_in_other, factorize_polynomial
 from connect_base import Data
 
 
@@ -110,6 +110,34 @@ def NOK(update=None, context=None, run=False):
         except Exception:
             update.message.reply_text(text="Ошибка! Неверно введены данные!")
 
+def fact_on_gorner(update=None, context=None, run=False):
+    if not run:
+        data(update.message.chat.id).setLocation(update.message.chat.id, "fact_on_gorner")
+        update.message.reply_text(text="Введите, пожалуйста, целые числа через пробел. Пример: Дан многочлен 5x^4 + 5x^3 + x^2 - 11 необходимо ввести его коэффициенты через пробел, начиная с наибольшего, т.е. <5 5 1 0 -11>")
+    else:
+        try:
+            arr = [int(i) for i in update.message.text.split()]
+            array = factorize_polynomial([arr])
+            st = ""
+            for i in array:
+                st += "("
+                n = len(i)
+                for j, k in enumerate(i):
+                    if j != 0:
+                        st += " - " if k < 0 else " + "
+                    k = abs(k)
+                    if j == n - 1:
+                        st += str(k)
+                    elif j == n - 2:
+                        st += f"{k}x"
+                    else:
+                        st += f"{k}x^{n - j - 1}"
+                st += ")"
+            update.message.reply_text(text=f"""Были заданы коэффициенты: {" ".join(str(i) for i in arr)}
+Результат: < {st} >""")
+        except Exception:
+            update.message.reply_text(text="Ошибка! Неверно введены данные!")
+
 def calc(update, context):
     data(update.message.chat.id).setLocation(update.message.chat.id, "calc")
     keyboards.text.text = "✍"
@@ -160,7 +188,9 @@ def message_input(update, context):
         elif location == "average":
             average(update, context, run=True)
         elif location == "convert_in_number_systems":
-            convert_in_number_systems(update, context, run=True)        
+            convert_in_number_systems(update, context, run=True)
+        elif location == "fact_on_gorner":
+            fact_on_gorner(update, context, run=True)
     except Exception:
         update.message.reply_text(text="Ой, перезапустите меня, пожалуйста! /start")
     
@@ -179,6 +209,7 @@ if __name__ == '__main__': # запуск программы
     dispatcher.add_handler(CommandHandler("nok", NOK))
     dispatcher.add_handler(CommandHandler("compare", compare))
     dispatcher.add_handler(CommandHandler("average", average))
+    dispatcher.add_handler(CommandHandler("fact_on_gorner", fact_on_gorner))
     dispatcher.add_handler(CommandHandler("convert_in_number_systems", convert_in_number_systems))
     dispatcher.add_handler(CallbackQueryHandler(run))
     dispatcher.add_handler(MessageHandler(Filters.text, message_input))

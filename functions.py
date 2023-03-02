@@ -27,6 +27,27 @@ def converting_one_in_other(one, ss1, ss2):
     return f"{st[::-1]}{st2}"
 
 
+def factorize_polynomial(arr):
+    if len(arr[-1]) > 2:
+        curr = arr[-1]
+        n = abs(curr[-1])
+        for d in range(1, n + 1):
+            if n % d == 0:
+                arr_d, k = [], 0
+                for x in [0] + curr:
+                    k = d * k + x
+                    arr_d += [k]
+                if arr_d[-1] == 0:
+                    return factorize_polynomial(arr[:-1] + [[1, -d]] + [arr_d[1:-1]])
+                arr_d, k, d = [], 0, d * -1
+                for x in [0] + curr:
+                    k = d * k + x
+                    arr_d += [k]
+                if arr_d[-1] == 0:
+                    return factorize_polynomial(arr[:-1] + [[1, -d]] + [arr_d[1:-1]])
+    return arr
+
+
 change_sign_in_add = lambda add: list(map(lambda obj: neg(obj), add.objs)) # вызывается, когда знак выражения отрицательный. Возвращает противоположные элементы
 simple_nod = lambda a, b: a if b == 0 else simple_nod(b, a % b)
 nod = lambda *args: reduce(lambda x, y: simple_nod(x, y), args)
