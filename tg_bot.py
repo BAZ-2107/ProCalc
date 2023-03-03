@@ -125,6 +125,8 @@ def fact_on_gorner(update=None, context=None, run=False):
                 for j, k in enumerate(i):
                     if j != 0:
                         st += " - " if k < 0 else " + "
+                    elif k < 0:
+                        st += "-"
                     k = abs(k)
                     if j == n - 1:
                         st += str(k)
