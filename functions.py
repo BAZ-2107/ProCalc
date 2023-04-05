@@ -1,11 +1,56 @@
 # -*- coding: utf-8 -*-
 from functools import reduce
+from objects import Watch
 
 
 alpha = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 converting_to_decimal_int = lambda a, ss: sum(alpha.index(a[-i-1])*ss**i for i in range(len(a)))
 converting_to_decimal_float = lambda a, ss: sum(alpha.index(a[i])*ss**(-i-1) for i in range(len(a)))
 
+def for_info_sqrt(s):
+    b, res, arr = s, 0, []
+    if int(b) < 0:
+        raise Exception
+    s = list(str(s))
+    if len(s) % 2:
+        arr += [int(s.pop(0))]
+    while s:
+        arr += [int(s.pop(0) + s.pop(0))]
+    n = "1"
+    a = Watch()
+    a.setTitle("Извлечение квадратного корня")
+    a.setEmptyString()
+    a.setString("Алгоритм извлечения квадратного корня:")
+    a.setString("Пусть x = 0, r - число, образуемое первой группой")
+    a.setString("1. Разбить число на пары цифр, начиная справа")
+    a.setString("2. Подобрать такую максимальную цифру i, что r >= (20*x+i)*i")
+    a.setString("3. Приписать полученную цифру справа к x")
+    a.setString("4. r = r - (20*x+i)*i")
+    a.setString("5. Приписать справа к r следующую пару цифр")
+    a.setString("6. Повторить пункты 2-5, пока не кончатся группы")
+    a.setEmptyString()
+    a.setString("Дано число: "+ b)
+    a.setString("Надо разбить его на пары цифр, начиная справа")
+    a.setString("Получается: " + "'".join(str(i) for i in arr))
+    a.setString(f"Пусть x = 0, r = {arr[0]}")
+    ost = 0
+    while arr:
+        ost = ost * 100 + arr.pop(0)
+        for_sub = res * 20
+        for i in range(9, -1, -1):
+            vych = (for_sub + i) * i
+            if vych <= ost:
+                a.setString(f"При i={i}: {ost}>=(20*{res}+{i})*{i}. x={res*10+i}, r={ost}-{vych}={ost-vych}.")
+                if arr:
+                    a.setString(f"Приписываем к r следующую группу: r={(ost - vych) * 100 + arr[0]}")
+                res = res * 10 + i
+                ost -= vych
+                break
+    if ost:
+        a.setString(f"Результат: x = {res}(целая часть)")
+    else:
+        a.setString(f"Результат: x = {res}")
+    print(a, file=open("for_info.txt", "w", encoding="utf-8"))
 
 def converting_one_in_other(one, ss1, ss2):
     global alpha

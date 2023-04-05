@@ -4,8 +4,9 @@ from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, MessageH
 from  for_tg.keyboards import Keyboards
 from main import ProCalc
 from functools import reduce
-from functions import nod, nok, decode_expression, to_st, get_muls, converting_one_in_other, factorize_polynomial
+from functions import nod, nok, decode_expression, to_st, get_muls, converting_one_in_other, factorize_polynomial, for_info_sqrt
 from connect_base import Data
+from objects import Watch
 
 
 def run(update, context):
@@ -167,6 +168,17 @@ def compare(update=None, context=None, run=False):
         except Exception:
             update.message.reply_text(text="Ошибка! Неверно введены данные!")
 
+def info_sqrt(update=None, context=None, run=False):
+    if not run:
+        data(update.message.chat.id).setLocation(update.message.chat.id, "info_sqrt")
+        update.message.reply_text(text="Введите, пожалуйста, натуральное число, и мы подробно извлечем из него квадратный корень")
+    else:
+        try:
+            for_info_sqrt(update.message.text)
+            context.bot.send_document(chat_id=update.message.chat.id, document=open('for_info.txt', 'rb'))
+        except Exception:
+            update.message.reply_text(text="Ошибка! Неверно введены данные!")        
+
 def help(update, context):
     data(update.message.chat.id).setLocation(update.message.chat.id, "menu")
     update.message.reply_text(text=open("txt/for_help.txt", encoding="utf-8").read())
@@ -193,6 +205,8 @@ def message_input(update, context):
             convert_in_number_systems(update, context, run=True)
         elif location == "fact_on_gorner":
             fact_on_gorner(update, context, run=True)
+        elif location == "info_sqrt":
+            info_sqrt(update, context, run=True)        
     except Exception:
         update.message.reply_text(text="Ой, перезапустите меня, пожалуйста! /start")
     
@@ -213,6 +227,7 @@ if __name__ == '__main__': # запуск программы
     dispatcher.add_handler(CommandHandler("average", average))
     dispatcher.add_handler(CommandHandler("fact_on_gorner", fact_on_gorner))
     dispatcher.add_handler(CommandHandler("convert_in_number_systems", convert_in_number_systems))
+    dispatcher.add_handler(CommandHandler("info_sqrt", info_sqrt))
     dispatcher.add_handler(CallbackQueryHandler(run))
     dispatcher.add_handler(MessageHandler(Filters.text, message_input))
     keyboards = Keyboards()
