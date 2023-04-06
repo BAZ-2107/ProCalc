@@ -18,38 +18,32 @@ def for_info_sqrt(s):
         arr += [int(s.pop(0) + s.pop(0))]
     n = "1"
     a = Watch()
-    a.setTitle("Извлечение квадратного корня")
-    a.setEmptyString()
-    a.setString("Алгоритм извлечения квадратного корня:")
-    a.setString("Пусть x = 0, r - число, образуемое первой группой")
-    a.setString("1. Разбить число на пары цифр, начиная справа")
-    a.setString("2. Подобрать такую максимальную цифру i, что r >= (20*x+i)*i")
-    a.setString("3. Приписать полученную цифру справа к x")
-    a.setString("4. r = r - (20*x+i)*i")
-    a.setString("5. Приписать справа к r следующую пару цифр")
-    a.setString("6. Повторить пункты 2-5, пока не кончатся группы")
-    a.setEmptyString()
-    a.setString("Дано число: "+ b)
-    a.setString("Надо разбить его на пары цифр, начиная справа")
-    a.setString("Получается: " + "'".join(str(i) for i in arr))
-    a.setString(f"Пусть x = 0, r = {arr[0]}")
-    ost = 0
+    f = open("txt/info_sqrt.txt", "r", encoding="utf-8")
+    a.setTitle(f.readline()[:-1])
+    for i in range(10):
+        a.setString(f.readline()[:-1])
+    a.setString(f.readline()[:-1].format(b))
+    a.setString(f.readline()[:-1])
+    a.setString(f.readline()[:-1].format("'".join(str(i) for i in arr)))
+    a.setString(f.readline()[:-1].format(arr[0]))
+    ost, part1, part2 = 0, f.readline()[:-1], f.readline()[:-1]
     while arr:
         ost = ost * 100 + arr.pop(0)
         for_sub = res * 20
         for i in range(9, -1, -1):
             vych = (for_sub + i) * i
             if vych <= ost:
-                a.setString(f"При i={i}: {ost}>=(20*{res}+{i})*{i}. x={res*10+i}, r={ost}-{vych}={ost-vych}.")
+                a.setString(part1.format(i, ost, res, i, i, res*10+i, ost, vych, ost-vych))
                 if arr:
-                    a.setString(f"Приписываем к r следующую группу: r={(ost - vych) * 100 + arr[0]}")
+                    a.setString(part2.format((ost - vych) * 100 + arr[0]))
                 res = res * 10 + i
                 ost -= vych
                 break
     if ost:
-        a.setString(f"Результат: x = {res}(целая часть)")
+        a.setString(f.readline().format(res) + "(целая часть)")
     else:
-        a.setString(f"Результат: x = {res}")
+        a.setString(f.readline().format(res))
+    f.close()
     print(a, file=open("for_info.txt", "w", encoding="utf-8"))
 
 def converting_one_in_other(one, ss1, ss2):

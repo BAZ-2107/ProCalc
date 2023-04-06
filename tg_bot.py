@@ -72,14 +72,10 @@ def average(update=None, context=None, run=False):
         update.message.reply_text(text="Введите, пожалуйста, действительные числа через пробел. Пример: 6,4 5 -4")
     else:
         try:
-            arr = sorted(float(i) for i in update.message.text.replace(",", ".").split())
-            update.message.reply_text(text=f"""Дана выборка: <{', '.join(list(map(str, arr)))}>
-Количество элементов: <{len(arr)}>
-Максимальный элемент: <{arr[-1]}>
-Минимальный элемент: <{arr[0]}>
-Сумма элементов: <{sum(arr)}>
-Среднее арифметическое: <{sum(arr) / len(arr)}>
-Медиана выборки: <{arr[len(arr) // 2] if len(arr) % 2 else sum(arr[len(arr) // 2 - 1:len(arr) // 2+1]) / 2}>""")
+            arr = update.message.text.replace(",", ".").split()
+            arr2 = sorted(list(map(float, arr)))
+            length, sm = len(arr), sum(arr2)
+            update.message.reply_text(text=open("txt/average.txt", encoding="utf-8").read().format(', '.join(arr), length, arr2[-1], arr2[0], sm, sm / length, arr2[length // 2] if length % 2 else sum(arr2[length // 2 - 1:length // 2+1]) / 2))
         except Exception:
             update.message.reply_text(text="Ошибка! Неверно введены данные!")
 
