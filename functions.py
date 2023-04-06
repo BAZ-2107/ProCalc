@@ -51,19 +51,42 @@ def converting_one_in_other(one, ss1, ss2):
     if any(alpha[ss1] <= i for i in one):
         raise Exception
     st, st2 = "", ""
+    f = open("txt/converting_one_in_other.txt", encoding="utf-8")
+    a = Watch()
+    a.setTitle(f.readline()[:-1])
+    for i in range(28):
+        a.setString(f.readline()[:-1])
+    a.setString(f.readline()[:-1].format(one, ss1, ss2))
     n, mod = (converting_to_decimal_int(one, ss1), None) if "," not in one else (converting_to_decimal_int(one.split(",")[0], ss1), converting_to_decimal_float(one.split(",")[-1], ss1))
+    if ss1 != 10:
+        b = one.split(",")[0]
+        a.setString("Перевод в 10 с.с.: " + "+".join(f"{b[-i-1]}*{ss1}^{i}" for i in range(len(b))) + f"={n}")
+        a.setEmptyString()
+        if mod:
+            k = one.split(",")[-1]
+            a.setString("Перевод в 10 с.с. дробной части: "+"+".join(f"{k[i]}*{ss1}^({-i-1})" for i in range(len(k))) + f"={mod}")
+    a.setEmptyString()
+    a.setString(f"Теперь переводим {n}  в с.с. с основанием {ss2}")
     while n:
+        a.setString(f"{n}/{ss2}={n // ss2} (ост. {alpha[n % ss2]})")
         st += alpha[n % ss2]
         n //= ss2
+    a.setString(f"При записи остатков наоборот: {st[::-1]}")
     if mod:
+        a.setEmptyString()
+        a.setString(f"Теперь переводим дробную часть {mod}  в с.с. с основанием {ss2}")        
         st = "," + st
         k, st2 = 0, ""
         while not (k == 6 or (mod % 1) == 0):
+            a.setString(f"{mod}*{ss2}={mod * ss2}, Целая часть: {alpha[int(mod * ss2)//1]}, остаток: {mod * ss2 % 1}")
             mod *= ss2
             st2 += alpha[int(mod // 1)]
             mod %= 1
             k += 1
-    return f"{st[::-1]}{st2}"
+        a.setString(f"В результате дробная часть записывается так: {st2}")
+    a.setString(f"Результат перевода: {st[::-1]}{st2}")
+    print(a, file=open("for_converting_one_in_other.txt", "w", encoding="utf-8"))
+    f.close()
 
 
 def factorize_polynomial(arr):

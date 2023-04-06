@@ -86,11 +86,9 @@ def convert_in_number_systems(update=None, context=None, run=False):
     else:
         try:
             arr = update.message.text.replace(".", ",").split()
-            update.message.reply_text(text=f"""Дано число: <{arr[0]}>
-Основание его системы счисления: <{arr[-2]}>
-Система счисления, в которую надо перевести: <{arr[-1]}>
-Результат перевода: <{converting_one_in_other(arr[0], int(arr[-2]), int(arr[-1]))}>""")
-        except Exception:
+            converting_one_in_other(arr[0], int(arr[1]), int(arr[2]))
+            context.bot.send_document(chat_id=update.message.chat.id, document=open('for_converting_one_in_other.txt', 'rb'))
+        except Exception as e:
             update.message.reply_text(text="Ошибка! Неверно введены данные!")
 
 def NOK(update=None, context=None, run=False):
