@@ -1,11 +1,44 @@
 # -*- coding: utf-8 -*-
 from functools import reduce
-from objects import Watch
+#from objects import Watch
 
 
 alpha = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 converting_to_decimal_int = lambda a, ss: sum(alpha.index(a[-i-1])*ss**i for i in range(len(a)))
 converting_to_decimal_float = lambda a, ss: sum(alpha.index(a[i])*ss**(-i-1) for i in range(len(a)))
+
+
+class Watch:
+    def __init__(self, size=16, border=False):
+        self.size = size
+        self.arr = []
+
+    def setTitle(self, name):
+        size_name = len(name)
+        if size_name > self.size:
+            self.size = size_name
+        self.arr += [name]
+        self.arr += ['+']
+        
+
+    def setEmptyString(self):
+        self.arr += [" "]
+
+    def setString(self, name):
+        self.setTitle(name)
+        del self.arr[-1]
+
+    def __str__(self):
+        st, arr_2 = "", self.arr[:]
+        arr_2.insert(0, "+")
+        arr_2 += ["+"]
+        for i, elem in enumerate(arr_2):
+            if elem == "+":
+                arr_2[i] = elem * (self.size + 4)
+            else:
+                arr_2[i] = f"+ {elem.ljust(self.size)} +"
+        return "\n".join(arr_2)
+
 
 def for_info_sqrt(s):
     b, res, arr = s, 0, []
