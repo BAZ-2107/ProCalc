@@ -111,27 +111,8 @@ def fact_on_gorner(update=None, context=None, run=False):
         update.message.reply_text(text="Введите, пожалуйста, целые числа через пробел. Пример: Дан многочлен 5x^4 + 5x^3 + x^2 - 11 необходимо ввести его коэффициенты через пробел, начиная с наибольшего, т.е. <5 5 1 0 -11>")
     else:
         try:
-            arr = [int(i) for i in update.message.text.split()]
-            array = factorize_polynomial([arr])
-            st = ""
-            for i in array:
-                st += "("
-                n = len(i)
-                for j, k in enumerate(i):
-                    if j != 0:
-                        st += " - " if k < 0 else " + "
-                    elif k < 0:
-                        st += "-"
-                    k = abs(k)
-                    if j == n - 1:
-                        st += str(k)
-                    elif j == n - 2:
-                        st += f"{k}x"
-                    else:
-                        st += f"{k}x^{n - j - 1}"
-                st += ")"
-            update.message.reply_text(text=f"""Были заданы коэффициенты: {" ".join(str(i) for i in arr)}
-Результат: < {st} >""")
+            factorize_polynomial([int(i) for i in update.message.text.split()])
+            context.bot.send_document(chat_id=update.message.chat.id, document=open('factorize_polynomial.txt', 'rb'))
         except Exception:
             update.message.reply_text(text="Ошибка! Неверно введены данные!")
 

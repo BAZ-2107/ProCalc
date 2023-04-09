@@ -14,9 +14,6 @@ class Watch:
         self.arr = []
 
     def setTitle(self, name):
-        size_name = len(name)
-        if size_name > self.size:
-            self.size = size_name
         self.arr += [name]
         self.arr += ['+']
         
@@ -32,12 +29,21 @@ class Watch:
         st, arr_2 = "", self.arr[:]
         arr_2.insert(0, "+")
         arr_2 += ["+"]
+        self.size = max(len(i) for i in self.arr)
         for i, elem in enumerate(arr_2):
             if elem == "+":
                 arr_2[i] = elem * (self.size + 4)
             else:
                 arr_2[i] = f"+ {elem.ljust(self.size)} +"
         return "\n".join(arr_2)
+
+    def create_table(self, arr):
+        size = max(max(len(str(j)) for j in i) for i in arr) + 2
+        k = size * len(arr[-1]) + len(arr[-1]) - 1
+        while arr:
+            self.arr += ["|".join(str(elem).center(size) for elem in arr.pop(0))]
+            if arr:
+                self.arr += ["-" * k]
 
 
 def for_info_sqrt(s):
@@ -123,24 +129,43 @@ def converting_one_in_other(one, ss1, ss2):
 
 
 def factorize_polynomial(arr):
-    if len(arr[-1]) > 2:
-        curr = arr[-1]
-        n = abs(curr[-1])
-        for d in range(1, n + 1):
-            if n % d == 0:
-                arr_d, k = [], 0
-                for x in [0] + curr:
-                    k = d * k + x
-                    arr_d += [k]
-                if arr_d[-1] == 0:
-                    return factorize_polynomial(arr[:-1] + [[1, -d]] + [arr_d[1:-1]])
-                arr_d, k, d = [], 0, d * -1
-                for x in [0] + curr:
-                    k = d * k + x
-                    arr_d += [k]
-                if arr_d[-1] == 0:
-                    return factorize_polynomial(arr[:-1] + [[1, -d]] + [arr_d[1:-1]])
-    return arr
+    a = Watch()
+    a.setTitle("Разложение многочлена по схеме Горнера")
+    a.setEmptyString()
+    a.setString("Если дан многочлен с целыми коэффициентами,")
+    a.setString("то один из его корней может быть делителем свободного члена")
+    a.setString("Обозначим его за х. Пусть r = 0. Запишем в строчку коэффициенты")
+    a.setString("Действуем по следующему алгоритму: под каждым коэффициентом(a)")
+    a.setString("Записываем результат выражения x*r + a, r становится равным x*r + a")
+    a.setString("Если под последним коеффициентом получился 0, то мы нашли этот корень")
+    a.setEmptyString()
+    a.setTitle(f"На вход получены коеффициенты: {', '.join(str(i) for i in arr)}")
+    arr2, n, answer = [["x"] + arr[:]], arr[-1], None
+    for d in range(1, abs(arr[-1]) + 1):
+        if n % d == 0:
+            arr2, k = arr2 + [[d]], 0
+            for x in arr:
+                k = d * k + x
+                arr2[-1] += [k]
+            if arr2[-1][-1] == 0:
+                answer = -d
+                break
+            arr2, k = arr2 + [[-d]], 0
+            for x in arr:
+                k = -d * k + x
+                arr2[-1] += [k]
+            if arr2[-1][-1] == 0:
+                answer = -d
+                break
+    a.setEmptyString()
+    a.create_table(arr2)
+    if answer:
+        a.setEmptyString()
+        a.setString(f"Подошло число {answer}")
+    else:
+        a.setEmptyString()
+        a.setString(f"К сожалению, никакое число не подошло")        
+    print(a, file=open("factorize_polynomial.txt", "w", encoding="utf-8"))
 
 
 change_sign_in_add = lambda add: list(map(lambda obj: neg(obj), add.objs)) # вызывается, когда знак выражения отрицательный. Возвращает противоположные элементы
