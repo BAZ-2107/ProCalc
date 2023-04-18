@@ -4,7 +4,9 @@ from vk_api.keyboard import VkKeyboard
 class Keyboards:
     color = 'primary'
     keyboard1 = VkKeyboard()
-    for i, row in enumerate(["/start", "/help", "/calc", "/compare 6*5;4", "/nok 6;5;4", "/nod 6;5;4"]):
+    for i, row in enumerate(["start", "help", "calc", "nod", "nok", "compare", "factorize", 
+                             "convert_in_number_systems", "info_sqrt", "fact_on_gorner", 
+                             "average"]):
         if (i % 2 == 0) and (i != 0):
             keyboard1.add_line()
         keyboard1.add_button(row)
