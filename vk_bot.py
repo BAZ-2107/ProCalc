@@ -145,10 +145,14 @@ def main():
                     location = data.getLocation(id)
                     if location in ["fact_on_gorner", "info_sqrt", "convert_in_number_systems"]:
                         peer = event.obj.message['peer_id']
-                        result = json.loads(requests.post(vk.docs.getMessagesUploadServer(type='doc', peer_id=peer)['upload_url'],
-                                files={'file': diction[location](msg)}).text)
-                        jsonAnswer = vk.docs.save(file=result['file'], title=location, tags=[])
-                        vk.messages.send(peer_id=peer, random_id=0, attachment=f"doc{jsonAnswer['doc']['owner_id']}_{jsonAnswer['doc']['id']}")                        
+                        answer = diction[location](msg)
+                        if type(answer) == str:
+                            vk.messages.send(user_id=id, keyboard=keyboard.keyboard1.get_keyboard(), message=answer, random_id=0)
+                        else:
+                            result = json.loads(requests.post(vk.docs.getMessagesUploadServer(type='doc', peer_id=peer)['upload_url'],
+                                    files={'file': answer}).text)
+                            jsonAnswer = vk.docs.save(file=result['file'], title=location, tags=[])
+                            vk.messages.send(peer_id=peer, random_id=0, attachment=f"doc{jsonAnswer['doc']['owner_id']}_{jsonAnswer['doc']['id']}")
                     else:
                         vk.messages.send(user_id=id, keyboard=keyboard.keyboard1.get_keyboard(), message=diction[location](msg), random_id=0)
             elif event.type == VkBotEventType.MESSAGE_EVENT:
