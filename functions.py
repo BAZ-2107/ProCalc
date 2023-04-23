@@ -3,7 +3,7 @@ from functools import reduce
 #from objects import Watch
 
 
-alpha = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+alpha = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
 converting_to_decimal_int = lambda a, ss: sum(alpha.index(a[-i-1])*ss**i for i in range(len(a)))
 converting_to_decimal_float = lambda a, ss: sum(alpha.index(a[i])*ss**(-i-1) for i in range(len(a)))
 
