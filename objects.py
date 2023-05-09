@@ -151,7 +151,7 @@ class arccos(sin):
 
 class arctg(sin):
     def in_decimal(self):
-        return self.sign * degrees(atan(self.cont.in_decimal())), 4
+        return self.sign * degrees(atan(self.cont.in_decimal()))
 
 
 class arcctg(sin):
