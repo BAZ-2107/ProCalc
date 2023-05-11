@@ -148,7 +148,7 @@ def factorize_polynomial(arr):
                 k = d * k + x
                 arr2[-1] += [k]
             if arr2[-1][-1] == 0:
-                answer = -d
+                answer = d
                 break
             arr2, k = arr2 + [[-d]], 0
             for x in arr:
